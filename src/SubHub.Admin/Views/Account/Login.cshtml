@@ -1,0 +1,34 @@
+@model AdminLoginViewModel
+
+@{
+    ViewData["Title"] = "ورود مدیر";
+}
+
+<div class="container py-5" dir="rtl" lang="fa" style="max-width: 520px;">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <h1 class="h4 fw-bold mb-4">ورود به پنل مدیریت</h1>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label">نام کاربری</label>
+                    <input asp-for="Username" class="form-control" autocomplete="username" />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label">گذرواژه</label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">ورود</button>
+            </form>
+        </div>
+    </div>
+</div>

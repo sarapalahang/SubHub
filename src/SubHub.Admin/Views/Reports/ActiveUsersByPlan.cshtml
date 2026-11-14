@@ -1,0 +1,116 @@
+@model SubHub.Contracts.Reports.ActiveUsersByPlanReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "کاربران فعال به تفکیک پلن";
+}
+
+<div class="report-page">
+    <div class="page-heading">
+        <div>
+            <h1>کاربران فعال به تفکیک پلن‌ها</h1>
+            <p>کاربران دارای اشتراک فعال و دارای اعتبار در زمان تهیه گزارش.</p>
+        </div>
+        <span class="heading-tag">کاربر هر پلن یکتا شمرده می‌شود</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-4"><div class="metric-card metric-purple"><span class="metric-label">کل کاربران فعال</span><strong class="metric-value">@Model.TotalActiveUsers.ToString("N0")</strong><span class="metric-note">کاربران یکتای دارای اشتراک معتبر</span></div></div>
+        <div class="col-6 col-xl-4"><div class="metric-card metric-green"><span class="metric-label">اشتراک‌های فعال</span><strong class="metric-value">@Model.TotalActiveSubscriptions.ToString("N0")</strong><span class="metric-note">تعداد رکوردهای اشتراک معتبر</span></div></div>
+        <div class="col-12 col-xl-4"><div class="metric-card metric-orange"><span class="metric-label">پلن‌های دارای کاربر فعال</span><strong class="metric-value">@Model.Plans.Count.ToString("N0")</strong><span class="metric-note">پلن‌هایی که حداقل یک مشترک فعال دارند</span></div></div>
+    </div>
+
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+
+    <section class="report-card mb-4">
+        <div class="card-body">
+            <div class="card-heading"><h2>تعداد کاربران فعال در هر پلن</h2><span class="card-subtitle">مقایسه پلن‌ها</span></div>
+            @if (Model.Plans.Count > 0)
+            {
+                <div class="chart-area chart-tall"><canvas id="activeUsersChart" role="img" aria-label="نمودار کاربران فعال به تفکیک پلن"></canvas></div>
+            }
+            else
+            {
+                <div class="empty-state">در حال حاضر اشتراک فعال و معتبری برای نمایش وجود ندارد.</div>
+            }
+        </div>
+    </section>
+
+    <section class="report-card mb-4">
+        <div class="card-body">
+            <div class="card-heading"><h2>تغییرات کاربران فعال هر پلن</h2><span class="card-subtitle">روند شش ماه اخیر، بر اساس بازهٔ اعتبار اشتراک</span></div>
+            @if (Model.Plans.Count > 0)
+            {
+                <div class="chart-area chart-tall"><canvas id="activeUsersTrendChart" role="img" aria-label="روند تاریخی کاربران فعال هر پلن"></canvas></div>
+            }
+            else
+            {
+                <div class="empty-state">هنوز سابقه‌ای برای نمایش روند وجود ندارد.</div>
+            }
+        </div>
+    </section>
+
+    <section class="report-card">
+        <div class="card-body">
+            <div class="card-heading"><h2>جزئیات کاربران فعال پلن‌ها</h2><span class="card-subtitle">تعداد کاربر از تعداد اشتراک جدا شده است</span></div>
+            @if (Model.Plans.Count == 0)
+            {
+                <div class="empty-state">پس از فعال‌شدن اشتراک‌ها، آمار پلن‌ها در این جدول نمایش داده می‌شود.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table report-table align-middle">
+                        <thead><tr><th>پلن اشتراک</th><th>کاربران فعال</th><th>اشتراک‌های فعال</th></tr></thead>
+                        <tbody>
+                        @foreach (var plan in Model.Plans)
+                        {
+                            <tr><td><span class="plan-chip"><span class="plan-dot"></span>@plan.PlanTitle</span></td><td>@plan.ActiveUsers.ToString("N0")</td><td>@plan.ActiveSubscriptions.ToString("N0")</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) {
+                document.getElementById('chartLibraryWarning')?.classList.remove('d-none');
+                return;
+            }
+            const canvas = document.getElementById('activeUsersChart');
+            if (!canvas) return;
+            const Chart = window.Chart;
+            const labels = @Html.Raw(JsonSerializer.Serialize(Model.Plans.Select(item => item.PlanTitle)));
+            const activeUsers = @Html.Raw(JsonSerializer.Serialize(Model.Plans.Select(item => item.ActiveUsers)));
+            const activeSubscriptions = @Html.Raw(JsonSerializer.Serialize(Model.Plans.Select(item => item.ActiveSubscriptions)));
+            const historicalLabels = @Html.Raw(JsonSerializer.Serialize(Model.HistoricalLabels));
+            const historicalDatasets = @Html.Raw(JsonSerializer.Serialize(Model.Plans.Select(item => new { label = item.PlanTitle, data = item.HistoricalActiveUsers })));
+            const colors = ['#5264e9', '#16a37a', '#e9a63a', '#e55c70', '#2799bd', '#8a65d6', '#34a7a0'];
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            new Chart(canvas, {
+                type: 'bar',
+                data: { labels, datasets: [
+                    { label: 'کاربران فعال', data: activeUsers, backgroundColor: '#42c4d0', borderRadius: 6, maxBarThickness: 30 },
+                    { label: 'اشتراک فعال', data: activeSubscriptions, backgroundColor: '#55d5a1', borderRadius: 6, maxBarThickness: 30 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+            });
+            const trendCanvas = document.getElementById('activeUsersTrendChart');
+            if (trendCanvas) {
+                new Chart(trendCanvas, {
+                    type: 'line',
+                    data: { labels: historicalLabels, datasets: historicalDatasets.map((dataset, index) => ({ ...dataset, borderColor: colors[index % colors.length], backgroundColor: colors[index % colors.length], tension: .3, pointRadius: 3, fill: false })) },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+                });
+            }
+        })();
+    </script>
+}

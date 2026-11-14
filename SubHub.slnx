@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SubHub.Admin/SubHub.Admin.csproj" Id="2abfc637-9fd9-44f5-b253-a6103600ee98" />
+    <Project Path="src/SubHub.Application/SubHub.Application.csproj" Id="e059d777-a64d-4f21-8c54-180eb4d30e3d" />
+    <Project Path="src/SubHub.Contracts/SubHub.Contracts.csproj" />
+    <Project Path="src/SubHub.Domain/SubHub.Domain.csproj" />
+    <Project Path="src/SubHub.Infrastructure/SubHub.Infrastructure.csproj" Id="2984a7ee-52a0-456a-9680-7d2f50af66b6" />
+    <Project Path="src/SubHub.Web/SubHub.Web.csproj" Id="0e21b991-4f5c-4f04-8a04-9e9942811205" />
+  </Folder>
+</Solution>

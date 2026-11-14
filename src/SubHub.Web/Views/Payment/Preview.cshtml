@@ -1,0 +1,130 @@
+﻿@model SubHub.Contracts.Plans.PlanResponse
+@{
+    ViewData["Title"] = "پیش‌فاکتور خرید اشتراک";
+
+    // نگاشت اطلاعات بر اساس پلن انتخابی کاربر
+    long currentPlanId = Model?.Id ?? 1;
+    string planTitle = "بسته اکو";
+    decimal planPrice = 100000;
+    int planDays = 30;
+    string planDesc = "مناسب استفاده محدود و روزمره، ساخت فایل و جست‌وجو";
+
+    if (currentPlanId == 2)
+    {
+        planTitle = "بسته پلاس";
+        planPrice = 160000;
+        planDays = 30;
+        planDesc = "مناسب استفاده روزمره، تمامی امکانات بسته اکو، سرعت بالاتر";
+    }
+    else if (currentPlanId == 3)
+    {
+        planTitle = "بسته پرو";
+        planPrice = 230000;
+        planDays = 30;
+        planDesc = "مناسب برای استفاده تخصصی، امکانات پلاس و ارسال پیام بیشتر";
+    }
+    else if (currentPlanId == 4)
+    {
+        planTitle = "بسته پرومکس";
+        planPrice = 380000;
+        planDays = 30;
+        planDesc = "تمامی امکانات بسته پرو، تولید ویدیو و بالاترین اولویت پردازش";
+    }
+}
+
+<div class="container-fluid py-5" style="background-color: #0b0c10; min-height: 100vh; direction: rtl; font-family: inherit;">
+    <div class="container" style="max-width: 680px;">
+
+        <!-- عنوان صفحه -->
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-white mb-2">پیش‌فاکتور خرید اشتراک</h3>
+            <p class="text-secondary small">لطفاً اطلاعات اشتراک و مشخصات تماس خود را تأیید کنید.</p>
+        </div>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger rounded-4 text-center py-2 mb-4 border-0 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null || TempData["Message"] != null)
+        {
+            <div class="alert alert-success rounded-4 text-center py-2 mb-4 border-0 shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@(TempData["SuccessMessage"] ?? TempData["Message"])
+            </div>
+        }
+
+        <!-- کارت پیش‌فاکتور -->
+        <div class="card rounded-4 p-4 text-white shadow-lg mb-4"
+             style="background-color: #17191e; border: 1px solid #2a2e37;">
+
+            <!-- خلاصه پلن انتخاب‌شده -->
+            <div class="d-flex justify-content-between align-items-center pb-3 border-bottom border-secondary mb-3">
+                <div>
+                    <span class="text-secondary small d-block mb-1">بسته انتخابی</span>
+                    <h4 class="fw-bold text-white mb-0">@planTitle</h4>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary px-3 py-2 rounded-pill small">اعتبار: @planDays روزه</span>
+                </div>
+            </div>
+
+            <div class="p-3 rounded-3 mb-3" style="background-color: #121316; border: 1px solid #232730;">
+                <span class="text-secondary small d-block mb-1">امکانات بسته:</span>
+                <p class="text-light small mb-0" style="line-height: 1.6;">@planDesc</p>
+            </div>
+
+            <!-- مبلغ فاکتور -->
+            <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-4"
+                 style="background-color: #1c2028; border: 1px dashed #3a4150;">
+                <span class="fw-bold text-light">مبلغ نهایی قابل پرداخت:</span>
+                <span class="fs-4 fw-bold text-white">@planPrice.ToString("N0") <span class="fs-6 fw-normal text-secondary">تومان</span></span>
+            </div>
+
+            <!-- فرم ثبت اطلاعات خریدار -->
+            <form asp-controller="Payment" asp-action="Checkout" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="planId" value="@currentPlanId" />
+
+                <div class="mb-3">
+                    <label for="buyerName" class="form-label text-light small fw-bold">نام و نام خانوادگی <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control rounded-3 py-2 text-white"
+                           id="buyerName" name="buyerName" placeholder="مثلاً: علی رضایی" required
+                           style="background-color: #121316; border: 1px solid #2e3440;" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="buyerPhoneNumber" class="form-label text-light small fw-bold">شماره موبایل <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control rounded-3 py-2 text-white text-end"
+                           id="buyerPhoneNumber" name="buyerPhoneNumber" placeholder="09xxxxxxxxx"
+                           pattern="^09[0-9]{9}$" required dir="ltr"
+                           style="background-color: #121316; border: 1px solid #2e3440;" />
+                    <div class="form-text text-secondary small mt-1">اطلاعات فاکتور پس از خرید به این شماره ارسال خواهد شد.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="buyerEmail" class="form-label text-light small fw-bold">ایمیل (برای دریافت فاکتور و اطلاعیه‌های اشتراک)</label>
+                    <input type="email" class="form-control rounded-3 py-2 text-white text-end"
+                           id="buyerEmail" name="buyerEmail" placeholder="example@email.com" dir="ltr"
+                           style="background-color: #121316; border: 1px solid #2e3440;" />
+                    <div class="form-text text-secondary small mt-1">رسید و فاکتور PDF به این نشانی ارسال می‌شود و ایمیل در پروفایل شما برای اطلاعیه‌های بعدی ذخیره خواهد شد.</div>
+                </div>
+
+                <!-- دکمه اتصال به درگاه پرداخت -->
+                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg mb-3"
+                        style="background-color: #2563eb; border: none; font-size: 1.05rem;">
+                    <i class="bi bi-credit-card-2-front me-2"></i> تأیید و اتصال به درگاه پرداخت آنلاین
+                </button>
+            </form>
+
+            <!-- دکمه بازگشت -->
+            <div class="text-center">
+                <a asp-controller="Plan" asp-action="Index" class="text-secondary small text-decoration-none">
+                    <i class="bi bi-arrow-right me-1"></i> انصراف و بازگشت به لیست پلن‌ها
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>

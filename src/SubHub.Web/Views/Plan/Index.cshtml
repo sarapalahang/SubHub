@@ -1,0 +1,84 @@
+﻿@model List<SubHub.Contracts.Plans.PlanResponse>
+@{
+    ViewData["Title"] = "مدیریت بسته‌ها";
+    long activePlanId = ViewBag.ActivePlanId != null ? (long)ViewBag.ActivePlanId : 0;
+}
+
+<style>
+    .pricing-card {
+        background-color: #17191e;
+        border: 2px solid #2a2e37;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            border-color: #2563eb !important;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35) !important;
+        }
+
+        .pricing-card.disabled-plan {
+            opacity: 0.7;
+            border-color: #20232a !important;
+        }
+</style>
+
+<div class="container-fluid py-5" style="background-color: #0b0c10; min-height: 100vh; direction: rtl;">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-white mb-2">انتخاب بسته اشتراک</h2>
+        <p class="text-secondary">مناسب‌ترین بسته را برای کسب‌وکار خود انتخاب کنید.</p>
+    </div>
+
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var plan in Model)
+                {
+                    bool isActive = (activePlanId == plan.Id);
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="card h-100 rounded-4 p-4 d-flex flex-column justify-content-between text-white border-0 shadow-lg pricing-card @(isActive ? "disabled-plan" : "")">
+                            <div>
+                                <h4 class="fw-bold text-center mb-3 text-white">@plan.Title</h4>
+                                <div class="text-center mb-4">
+                                    <span class="fs-1 fw-bold text-white">@plan.Price.ToString("N0")</span>
+                                    <span class="text-secondary small d-block mt-1">تومان</span>
+                                </div>
+                                <p class="text-secondary small text-center mb-4" style="line-height: 1.6; min-height: 48px;">
+                                    @plan.Description
+                                </p>
+                            </div>
+                            <div>
+                                @if (isActive)
+                                {
+                                    <button type="button" class="btn btn-secondary w-100 py-2 rounded-pill fw-bold mb-3" disabled style="opacity: 0.8; pointer-events: none;">
+                                        بسته فعلی شما
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Payment" asp-action="Preview" asp-route-planId="@plan.Id"
+                                       class="btn btn-light text-dark w-100 py-2 rounded-pill fw-bold shadow-sm mb-3">
+                                        انتخاب بسته
+                                    </a>
+                                }
+
+                                <ul class="list-unstyled text-start small border-top border-secondary pt-3 text-light m-0" style="font-size: 0.85rem;">
+                                    <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i> دسترسی کامل به امکانات</li>
+                                    <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i> پشتیبانی سیستم</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center text-secondary py-5">
+                    <p>هیچ بسته فعالی در سیستم تعریف نشده است.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

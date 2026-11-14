@@ -1,0 +1,14 @@
+@model SubHub.Admin.Models.PlanManagementViewModel
+
+@{
+    ViewData["Title"] = "ویرایش پلن اشتراک";
+}
+
+<div class="container py-4" dir="rtl" lang="fa" style="max-width: 760px;">
+    <h1 class="h3 fw-bold mb-4">ویرایش پلن اشتراک</h1>
+    <partial name="_Form" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

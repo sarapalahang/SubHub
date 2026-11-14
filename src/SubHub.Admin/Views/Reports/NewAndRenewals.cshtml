@@ -1,0 +1,48 @@
+@model SubHub.Contracts.Reports.CustomerActivityReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "کاربران جدید و تمدیدی";
+}
+
+<div class="report-page">
+    <div class="page-heading"><div><h1>کاربران جدید و تمدیدی</h1><p>ثبت‌نام‌های جدید و مشتریانی که خرید اشتراک را تمدید کرده‌اند.</p></div><span class="heading-tag">تمدید بر اساس خرید موفق قبلی محاسبه می‌شود</span></div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4"><div class="metric-card metric-purple"><span class="metric-label">ثبت‌نام جدید این ماه</span><strong class="metric-value">@Model.RegistrationsThisMonth.ToString("N0")</strong><span class="metric-note">از زمان ثبت تاریخ ایجاد حساب</span></div></div>
+        <div class="col-6 col-md-4"><div class="metric-card metric-blue"><span class="metric-label">خریدار جدید این ماه</span><strong class="metric-value">@Model.FirstTimeBuyersThisMonth.ToString("N0")</strong><span class="metric-note">اولین خرید موفق اشتراک</span></div></div>
+        <div class="col-6 col-md-4"><div class="metric-card metric-green"><span class="metric-label">مشتری تمدیدی این ماه</span><strong class="metric-value">@Model.RenewalCustomersThisMonth.ToString("N0")</strong><span class="metric-note">دارای خرید موفق قبلی</span></div></div>
+    </div>
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+    <section class="report-card mb-4"><div class="card-body"><div class="card-heading"><h2>روند ثبت‌نام و خرید اشتراک</h2><span class="card-subtitle">شش ماه اخیر</span></div><div class="chart-area chart-tall"><canvas id="customerActivityChart" role="img" aria-label="نمودار ثبت‌نام و خریدهای جدید و تمدیدی"></canvas></div></div></section>
+    <section class="report-card"><div class="card-body"><div class="card-heading"><h2>تعداد و درصد هر ماه</h2><span class="card-subtitle">درصد خریداران میان خریداران جدید و تمدیدی</span></div>
+        <div class="table-responsive"><table class="table report-table"><thead><tr><th>ماه</th><th>ثبت‌نام جدید</th><th>خریدار بار اول</th><th>سهم خریدار جدید</th><th>مشتری تمدیدی</th><th>سهم تمدید</th></tr></thead><tbody>
+        @for (var index = 0; index < Model.MonthlyLabels.Count; index++)
+        {
+            <tr><td>@Model.MonthlyLabels[index]</td><td>@Model.NewRegistrations[index].ToString("N0")</td><td>@Model.FirstTimeBuyers[index].ToString("N0")</td><td>@Model.FirstTimeBuyerPercentages[index].ToString("N1")٪</td><td>@Model.RenewalCustomers[index].ToString("N0")</td><td>@Model.RenewalPercentages[index].ToString("N1")٪</td></tr>
+        }
+        </tbody></table></div>
+        <p class="card-subtitle mt-3 mb-0">حساب‌های قدیمی که تاریخ ثبت‌نامشان در دیتابیس ثبت نشده، در آمار ثبت‌نام جدید لحاظ نمی‌شوند.</p>
+    </div></section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) { document.getElementById('chartLibraryWarning')?.classList.remove('d-none'); return; }
+            const Chart = window.Chart;
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            new Chart(document.getElementById('customerActivityChart'), {
+                type: 'bar',
+                data: { labels: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyLabels)), datasets: [
+                    { label: 'ثبت‌نام جدید', data: @Html.Raw(JsonSerializer.Serialize(Model.NewRegistrations)), backgroundColor: '#5264e9', borderRadius: 5 },
+                    { label: 'خریدار بار اول', data: @Html.Raw(JsonSerializer.Serialize(Model.FirstTimeBuyers)), backgroundColor: '#42b9c7', borderRadius: 5 },
+                    { label: 'مشتری تمدیدی', data: @Html.Raw(JsonSerializer.Serialize(Model.RenewalCustomers)), backgroundColor: '#55c895', borderRadius: 5 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+            });
+        })();
+    </script>
+}

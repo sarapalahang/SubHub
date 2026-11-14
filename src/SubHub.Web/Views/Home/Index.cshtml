@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "داشبورد مشتریان";
+    bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+}
+
+<div class="dashboard-container py-5">
+    <!-- بخش خوش‌آمدگویی -->
+    <div class="hero-section text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark">به پنل مشتریان «آهن جنوب» خوش آمدید</h1>
+        <p class="text-muted mt-3">مدیریت هوشمند اشتراک‌ها، پیگیری فاکتورها و گزارشات فروش در یک نگاه.</p>
+    </div>
+
+    <!-- کارت‌های دسترسی سریع -->
+    <div class="row g-4 justify-content-center">
+        <!-- کارت ۱: اشتراک‌های جاری -->
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="bi bi-shield-check icon-style"></i>
+                <h3>اشتراک‌های جاری</h3>
+                <p>بررسی وضعیت اشتراک فعال، تاریخ انقضا و جزئیات طرح فعلی شما.</p>
+                <a href="@(isLoggedIn ? "/Subscription/Current" : "/Account/Login")" class="btn btn-primary mt-3">
+                    @(isLoggedIn ? "ورود به اشتراک جاری" : "ورود به سیستم جهت دسترسی")
+                </a>
+            </div>
+        </div>
+
+        <!-- کارت ۲: تاریخچه خرید -->
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="bi bi-receipt icon-style"></i>
+                <h3>تاریخچه خرید</h3>
+                <p>مشاهده لیست فاکتورها و سوابق تراکنش‌های مالی انجام شده.</p>
+                <a href="@(isLoggedIn ? "/Invoice/PurchaseHistory" : "/Account/Login")" class="btn btn-primary mt-3">
+                    @(isLoggedIn ? "ورود به تاریخچه خرید" : "ورود به سیستم جهت دسترسی")
+                </a>
+            </div>
+        </div>
+
+        <!-- کارت ۳: خرید اشتراک -->
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="bi bi-card-checklist icon-style"></i>
+                <h3>خرید اشتراک</h3>
+                <p>مشاهده و انتخاب دوره‌های اشتراک برای دسترسی به امکانات.</p>
+                <a href="@(isLoggedIn ? "/Plan/Index" : "/Account/Login")" class="btn btn-primary mt-3">
+                    @(isLoggedIn ? "ورود به بخش اشتراک‌ها" : "ورود به سیستم جهت دسترسی")
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        direction: rtl;
+        font-family: 'Vazirmatn', sans-serif;
+    }
+
+    .feature-card {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+    .icon-style {
+        font-size: 3rem;
+        color: #2563eb;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .feature-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .feature-card p {
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background-color: #2563eb;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            color: #ffffff;
+        }
+</style>

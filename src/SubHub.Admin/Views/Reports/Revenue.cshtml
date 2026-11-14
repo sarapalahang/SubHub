@@ -1,0 +1,150 @@
+@model SubHub.Contracts.Reports.SubscriptionCommerceReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "گزارش درآمد اشتراک";
+}
+
+<div class="report-page">
+    <div class="page-heading">
+        <div>
+            <h1>گزارش درآمد حاصل از فروش اشتراک</h1>
+            <p>درآمد فاکتورهای موفق را در طول زمان و به تفکیک پلن مشاهده کنید.</p>
+        </div>
+        <span class="heading-tag">مبالغ به تومان</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3"><div class="metric-card metric-purple"><span class="metric-label">کل درآمد</span><strong class="metric-value">@Model.TotalRevenue.ToString("N0")</strong><span class="metric-note">از ابتدای فعالیت سامانه</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-green"><span class="metric-label">درآمد امسال</span><strong class="metric-value">@Model.CurrentYearRevenue.ToString("N0")</strong><span class="metric-note">از ابتدای سال میلادی جاری</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-blue"><span class="metric-label">درآمد این ماه</span><strong class="metric-value">@Model.CurrentMonthRevenue.ToString("N0")</strong><span class="metric-note">فاکتورهای پرداخت‌شده در ماه جاری</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-orange"><span class="metric-label">درآمد ماه قبل</span><strong class="metric-value">@Model.PreviousMonthRevenue.ToString("N0")</strong><span class="metric-note">برای مقایسه روند درآمد</span></div></div>
+    </div>
+
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-7">
+            <section class="report-card"><div class="card-body">
+                <div class="card-heading"><h2>روند درآمد شش ماه اخیر</h2><span class="card-subtitle">مبالغ به تومان</span></div>
+                <div class="chart-area chart-tall"><canvas id="monthlyRevenueChart" role="img" aria-label="نمودار درآمد ماهانه"></canvas></div>
+            </div></section>
+        </div>
+        <div class="col-xl-5">
+            <section class="report-card"><div class="card-body">
+                <div class="card-heading"><h2>درآمد به تفکیک مدت اشتراک</h2><span class="card-subtitle">ماهانه، سه‌ماهه و ...</span></div>
+                @if (Model.PlanDurationBreakdown.Any(item => item.Revenue > 0))
+                {
+                    <div class="chart-area chart-tall"><canvas id="durationRevenueChart" role="img" aria-label="نمودار درآمد بر اساس مدت پلن"></canvas></div>
+                }
+                else
+                {
+                    <div class="empty-state">هنوز درآمدی برای نمایش ثبت نشده است.</div>
+                }
+            </div></section>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-5">
+            <section class="report-card h-100"><div class="card-body">
+                <div class="card-heading"><h2>درآمد به تفکیک درگاه</h2><span class="card-subtitle">درگاه ثبت‌شده در هر فاکتور</span></div>
+                <div class="chart-area chart-short"><canvas id="gatewayRevenueChart" role="img" aria-label="نمودار درآمد به تفکیک درگاه پرداخت"></canvas></div>
+                @if (Model.GatewayBreakdown.Count > 0)
+                {
+                    <div class="table-responsive mt-3"><table class="table report-table"><thead><tr><th>درگاه</th><th>فروش</th><th>درآمد</th></tr></thead><tbody>
+                    @foreach (var gateway in Model.GatewayBreakdown)
+                    {
+                        <tr><td>@gateway.GatewayName</td><td>@gateway.SalesCount.ToString("N0")</td><td>@gateway.Revenue.ToString("N0") تومان</td></tr>
+                    }
+                    </tbody></table></div>
+                }
+            </div></section>
+        </div>
+        <div class="col-xl-7">
+            <section class="report-card h-100"><div class="card-body">
+                <div class="card-heading"><h2>درآمد به تفکیک نوع اشتراک</h2><span class="card-subtitle">بر اساس مدت پلن</span></div>
+                @if (Model.PlanDurationBreakdown.Count > 0)
+                {
+                    <div class="table-responsive"><table class="table report-table"><thead><tr><th>نوع اشتراک</th><th>تعداد فروش</th><th>درآمد</th></tr></thead><tbody>
+                    @foreach (var item in Model.PlanDurationBreakdown)
+                    {
+                        <tr><td>@item.DurationLabel</td><td>@item.SalesCount.ToString("N0")</td><td>@item.Revenue.ToString("N0") تومان</td></tr>
+                    }
+                    </tbody></table></div>
+                }
+                else
+                {
+                    <div class="empty-state">هنوز فروشی برای نمایش ثبت نشده است.</div>
+                }
+            </div></section>
+        </div>
+    </div>
+
+    <section class="report-card">
+        <div class="card-body">
+            <div class="card-heading"><h2>درآمد به تفکیک پلن</h2><span class="card-subtitle">بر پایه فاکتورهای پرداخت‌شده</span></div>
+            @if (Model.PlanBreakdown.Count == 0)
+            {
+                <div class="empty-state">هنوز فاکتور پرداخت‌شده‌ای برای نمایش ثبت نشده است.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table report-table align-middle">
+                        <thead><tr><th>پلن اشتراک</th><th>درآمد</th><th>تعداد فروش</th><th>سهم از درآمد</th></tr></thead>
+                        <tbody>
+                        @foreach (var plan in Model.PlanBreakdown)
+                        {
+                            var share = Model.TotalRevenue == 0 ? 0 : Math.Round(plan.Revenue * 100m / Model.TotalRevenue, 1);
+                            <tr><td><span class="plan-chip"><span class="plan-dot"></span>@plan.PlanTitle</span></td><td>@plan.Revenue.ToString("N0") تومان</td><td>@plan.SalesCount.ToString("N0")</td><td>@share.ToString("N1")٪</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) {
+                document.getElementById('chartLibraryWarning')?.classList.remove('d-none');
+                return;
+            }
+            const Chart = window.Chart;
+            const labels = @Html.Raw(JsonSerializer.Serialize(Model.MonthlyLabels));
+            const monthlyRevenue = @Html.Raw(JsonSerializer.Serialize(Model.MonthlyRevenue));
+            const durationLabels = @Html.Raw(JsonSerializer.Serialize(Model.PlanDurationBreakdown.Select(item => item.DurationLabel)));
+            const durationRevenue = @Html.Raw(JsonSerializer.Serialize(Model.PlanDurationBreakdown.Select(item => item.Revenue)));
+            const gatewayLabels = @Html.Raw(JsonSerializer.Serialize(Model.GatewayBreakdown.Select(item => item.GatewayName)));
+            const gatewayRevenue = @Html.Raw(JsonSerializer.Serialize(Model.GatewayBreakdown.Select(item => item.Revenue)));
+            const colors = ['#5264e9', '#16a37a', '#e9a63a', '#e55c70', '#2799bd', '#8a65d6', '#34a7a0'];
+            const money = new Intl.NumberFormat('fa-IR');
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            new Chart(document.getElementById('monthlyRevenueChart'), {
+                type: 'line',
+                data: { labels, datasets: [{ label: 'درآمد (تومان)', data: monthlyRevenue, borderColor: '#5264e9', backgroundColor: 'rgba(82, 100, 233, .13)', fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: '#5264e9' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => money.format(context.raw) + ' تومان' } } }, scales: { y: { beginAtZero: true, ticks: { callback: value => money.format(value) } }, x: { grid: { display: false } } } }
+            });
+            const durationRevenueCanvas = document.getElementById('durationRevenueChart');
+            if (durationRevenueCanvas) {
+                new Chart(durationRevenueCanvas, {
+                    type: 'doughnut',
+                    data: { labels: durationLabels, datasets: [{ data: durationRevenue, backgroundColor: colors, borderColor: '#fff', borderWidth: 3, hoverOffset: 5 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: context => context.label + ': ' + money.format(context.raw) + ' تومان' } } } }
+                });
+            }
+            new Chart(document.getElementById('gatewayRevenueChart'), {
+                type: 'pie',
+                data: { labels: gatewayLabels, datasets: [{ data: gatewayRevenue, backgroundColor: colors, borderColor: '#fff', borderWidth: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: context => context.label + ': ' + money.format(context.raw) + ' تومان' } } } }
+            });
+        })();
+    </script>
+}

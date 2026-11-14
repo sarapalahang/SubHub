@@ -1,0 +1,39 @@
+﻿@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+@{
+    ViewData["Title"] = "تایید کد پیامک شده";
+}
+
+<div class="container py-5" style="direction: rtl;">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h3 class="text-center fw-bold mb-4">کد تایید را وارد کنید</h3>
+                @if (HostEnvironment.IsDevelopment())
+                {
+                    <p class="text-muted text-center mb-3">کد تست محلی: <strong>12345</strong></p>
+                }
+                else
+                {
+                    <p class="text-muted text-center mb-4">کد ۶ رقمی ارسال شده به شماره موبایل شما را وارد نمایید.</p>
+                }
+
+                <form asp-action="VerifyOtp" method="post">
+                    <div class="mb-3">
+                        @if (HostEnvironment.IsDevelopment())
+                        {
+                            <input type="text" name="code" class="form-control form-control-lg text-center fw-bold fs-3 rounded-3" placeholder="-----" maxlength="5" pattern="[0-9]{5}" inputmode="numeric" autocomplete="one-time-code" required autofocus />
+                        }
+                        else
+                        {
+                            <input type="text" name="code" class="form-control form-control-lg text-center fw-bold fs-3 rounded-3" placeholder="------" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" required autofocus />
+                        }
+                    </div>
+
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 rounded-3 fw-bold">تایید و ورود</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

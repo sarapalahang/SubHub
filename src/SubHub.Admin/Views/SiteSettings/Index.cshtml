@@ -1,0 +1,36 @@
+@model SubHub.Domain.Entities.SiteSetting
+
+@{
+    ViewData["Title"] = "تنظیمات سامانه";
+}
+
+<div class="container py-4" dir="rtl" lang="fa">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">تنظیمات سامانه</h1>
+        <p class="text-muted mb-0">مدیریت پیام‌های اطلاع‌رسانی و پیوست فاکتور</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="status">@successMessage</div>
+    }
+
+    <form asp-action="Index" method="post" class="card shadow-sm p-4">
+        @Html.AntiForgeryToken()
+        <div class="form-check form-switch mb-3">
+            <input asp-for="EnableSmsNotification" class="form-check-input" />
+            <label asp-for="EnableSmsNotification" class="form-check-label">ارسال پیامک</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+            <input asp-for="EnableEmailNotification" class="form-check-input" />
+            <label asp-for="EnableEmailNotification" class="form-check-label">ارسال ایمیل</label>
+        </div>
+        <div class="form-check form-switch mb-4">
+            <input asp-for="EnablePdfAttachment" class="form-check-input" />
+            <label asp-for="EnablePdfAttachment" class="form-check-label">پیوست PDF فاکتور</label>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">ذخیره تنظیمات</button>
+        </div>
+    </form>
+</div>

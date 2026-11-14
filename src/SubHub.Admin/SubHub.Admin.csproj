@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>d111680a-640c-460a-b23f-8798959eccdd</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <ProjectReference Include="..\SubHub.Application\SubHub.Application.csproj" />
+    <ProjectReference Include="..\SubHub.Contracts\SubHub.Contracts.csproj" />
+    <ProjectReference Include="..\SubHub.Domain\SubHub.Domain.csproj" />
+    <ProjectReference Include="..\SubHub.Infrastructure\SubHub.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,102 @@
+﻿@{
+    var isAdmin = User.Identity?.IsAuthenticated == true;
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SubHub</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SubHub.Admin.styles.css" asp-append-version="true" />
+</head>
+<body class="@(isAdmin ? "admin-body" : "auth-body")">
+    @if (isAdmin)
+    {
+        <div class="admin-shell">
+            <aside class="admin-sidebar" id="adminSidebar" aria-label="منوی مدیریت">
+                <a class="brand-lockup" asp-controller="Home" asp-action="Index">
+                    <span class="brand-mark">S</span>
+                    <span><strong>SubHub</strong><small>پنل مدیریت</small></span>
+                </a>
+                <div class="sidebar-caption">مدیریت</div>
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link @(currentController == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index"><span class="nav-icon">⌂</span><span>داشبورد مدیریتی</span></a>
+                    <div class="sidebar-caption reports-caption">گزارش‌ها</div>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "Sales" ? "active" : "")" asp-controller="Reports" asp-action="Sales"><span class="nav-icon">▤</span><span>فروش اشتراک</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")" asp-controller="Reports" asp-action="Revenue"><span class="nav-icon">↗</span><span>درآمد اشتراک</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "PlanDistribution" ? "active" : "")" asp-controller="Reports" asp-action="PlanDistribution"><span class="nav-icon">◉</span><span>توزیع انواع پلن</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "ActiveUsersByPlan" ? "active" : "")" asp-controller="Reports" asp-action="ActiveUsersByPlan"><span class="nav-icon">◎</span><span>کاربران فعال پلن‌ها</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "NewAndRenewals" ? "active" : "")" asp-controller="Reports" asp-action="NewAndRenewals"><span class="nav-icon">⇄</span><span>کاربران جدید و تمدیدی</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "Payments" ? "active" : "")" asp-controller="Reports" asp-action="Payments"><span class="nav-icon">◷</span><span>وضعیت پرداخت‌ها</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "Cancellations" ? "active" : "")" asp-controller="Reports" asp-action="Cancellations"><span class="nav-icon">⊘</span><span>فسخ و انصراف</span></a>
+                    <a class="sidebar-link @(currentController == "Reports" && currentAction == "ExpiryNotifications" ? "active" : "")" asp-controller="Reports" asp-action="ExpiryNotifications"><span class="nav-icon">♧</span><span>اطلاع‌رسانی اتمام</span></a>
+                    <div class="sidebar-caption reports-caption">تنظیمات</div>
+                    <a class="sidebar-link @(currentController == "SiteSettings" ? "active" : "")" asp-controller="SiteSettings" asp-action="Index"><span class="nav-icon">⚙</span><span>تنظیمات سامانه</span></a>
+                    <a class="sidebar-link @(currentController == "Plans" ? "active" : "")" asp-controller="Plans" asp-action="Index"><span class="nav-icon">◇</span><span>مدیریت پلن‌ها</span></a>
+                </nav>
+                <div class="sidebar-bottom">
+                    <div class="admin-profile">
+                        <span class="profile-avatar">@(User.Identity?.Name?.FirstOrDefault() ?? 'A')</span>
+                        <span class="profile-copy"><strong>راهبر سیستم</strong><small>@User.Identity?.Name</small></span>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="sidebar-logout"><span class="nav-icon">↪</span> خروج از حساب</button>
+                    </form>
+                </div>
+            </aside>
+            <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="بستن منو"></button>
+            <div class="admin-main">
+                <header class="admin-topbar">
+                    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="باز کردن منو" aria-controls="adminSidebar" aria-expanded="false">☰</button>
+                    <div class="topbar-title"><span class="topbar-eyebrow">مدیریت سرویس</span><strong>@ViewData["Title"]</strong></div>
+                    <div class="topbar-status"><span></span> سامانه فعال است</div>
+                </header>
+                <main role="main" class="page-content">@RenderBody()</main>
+                <footer class="admin-footer">© 2026 SubHub <span>پنل مدیریت اشتراک‌ها</span></footer>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="auth-shell">
+            <header class="auth-topbar">
+                <a class="brand-lockup" asp-controller="Account" asp-action="Login"><span class="brand-mark">S</span><span><strong>SubHub</strong><small>مدیریت اشتراک‌ها</small></span></a>
+            </header>
+            <main role="main" class="auth-content">@RenderBody()</main>
+            <footer class="auth-footer">© 2026 SubHub</footer>
+        </div>
+    }
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (isAdmin)
+    {
+        <script>
+            (() => {
+                const sidebar = document.getElementById('adminSidebar');
+                const toggle = document.getElementById('sidebarToggle');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                const closeMenu = () => {
+                    sidebar?.classList.remove('is-open');
+                    backdrop?.classList.remove('is-visible');
+                    toggle?.setAttribute('aria-expanded', 'false');
+                };
+                toggle?.addEventListener('click', () => {
+                    const isOpen = sidebar?.classList.toggle('is-open') ?? false;
+                    backdrop?.classList.toggle('is-visible', isOpen);
+                    toggle?.setAttribute('aria-expanded', String(isOpen));
+                });
+                backdrop?.addEventListener('click', closeMenu);
+                document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+            })();
+        </script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,172 @@
+﻿@model SubHub.Contracts.Reports.DashboardReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "داشبورد مدیریتی";
+}
+
+<div class="report-page">
+    <div class="page-heading">
+        <div>
+            <h1>داشبورد مدیریتی</h1>
+            <p>نمای کلی فروش، اشتراک‌ها، کاربران و انصراف‌ها</p>
+        </div>
+        <span class="heading-tag">گزارش‌های سامانه SubHub</span>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-xl-3"><div class="metric-card metric-purple"><span class="metric-label">درآمد پرداخت‌شده</span><strong class="metric-value">@Model.TotalRevenue.ToString("N0")</strong><span class="metric-note">تومان</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-blue"><span class="metric-label">کل کاربران</span><strong class="metric-value">@Model.TotalSubscribers.ToString("N0")</strong><span class="metric-note">حساب‌های ثبت‌شده</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-green"><span class="metric-label">اشتراک‌های فعال</span><strong class="metric-value">@Model.ActiveSubscriptions.ToString("N0")</strong><span class="metric-note">دارای اعتبار در حال حاضر</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-orange"><span class="metric-label">فاکتورهای در انتظار</span><strong class="metric-value">@Model.PendingInvoicesCount.ToString("N0")</strong><span class="metric-note">نیازمند پیگیری پرداخت</span></div></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-4"><div class="metric-card"><span class="metric-label">کل اشتراک‌های ثبت‌شده</span><strong class="metric-value">@Model.TotalSubscriptions.ToString("N0")</strong><span class="metric-note">شامل همه وضعیت‌ها</span></div></div>
+        <div class="col-6 col-xl-4"><div class="metric-card metric-red"><span class="metric-label">اشتراک‌های فسخ‌شده</span><strong class="metric-value">@Model.CancelledSubscriptionsCount.ToString("N0")</strong><span class="metric-note">درصد فسخ: @Model.CancellationRatePercentage.ToString("N2")٪</span></div></div>
+        <div class="col-12 col-xl-4">
+            <div class="d-grid gap-2 h-100">
+                <a class="quick-report-link" asp-controller="Reports" asp-action="Sales"><span>گزارش فروش اشتراک</span><span>←</span></a>
+                <a class="quick-report-link" asp-controller="Reports" asp-action="Revenue"><span>گزارش درآمد اشتراک</span><span>←</span></a>
+                <a class="quick-report-link" asp-controller="Reports" asp-action="ActiveUsersByPlan"><span>کاربران فعال به تفکیک پلن</span><span>←</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-8">
+            <section class="report-card"><div class="card-body">
+                <div class="card-heading"><h2>درآمد ماهانه</h2><span class="card-subtitle">شش ماه اخیر · تومان</span></div>
+                <div class="chart-area"><canvas id="monthlyRevenueChart" role="img" aria-label="نمودار درآمد ماهانه"></canvas></div>
+            </div></section>
+        </div>
+        <div class="col-xl-4">
+            <section class="report-card"><div class="card-body">
+                <div class="card-heading"><h2>دلایل فسخ اشتراک</h2><span class="card-subtitle">توزیع دلایل ثبت‌شده</span></div>
+                @if (Model.CancellationReasons.Any(item => item.Count > 0))
+                {
+                    <div class="chart-area"><canvas id="cancellationReasonsChart" role="img" aria-label="نمودار دلایل فسخ اشتراک"></canvas></div>
+                }
+                else
+                {
+                    <div class="empty-state">هنوز دلیلی برای فسخ ثبت نشده است.</div>
+                }
+            </div></section>
+        </div>
+    </div>
+
+    <section class="report-card mb-4">
+        <div class="card-body">
+            <div class="card-heading"><h2>تعداد فسخ در شش ماه اخیر</h2><span class="card-subtitle">بر اساس تاریخ ثبت فسخ</span></div>
+            <div class="chart-area chart-short"><canvas id="monthlyCancellationsChart" role="img" aria-label="نمودار تعداد فسخ ماهانه"></canvas></div>
+        </div>
+    </section>
+
+    <div class="row g-3">
+        <div class="col-12 col-xl-6">
+            <section class="report-card h-100">
+                <div class="card-body">
+                    <div class="card-heading"><h2>آخرین فسخ‌ها</h2><span class="card-subtitle">۱۰ مورد اخیر</span></div>
+                    @if (Model.RecentCancellations.Count == 0)
+                    {
+                        <div class="empty-state">هنوز فسخی ثبت نشده است.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table report-table align-middle">
+                                <thead><tr><th>تاریخ</th><th>پلن</th><th>دلیل</th><th>توضیحات</th></tr></thead>
+                                <tbody>
+                                @foreach (var item in Model.RecentCancellations)
+                                {
+                                    <tr><td>@(item.CancelledAtUtc?.ToString("yyyy/MM/dd") ?? "—")</td><td>@item.PlanTitle</td><td>@item.Reason</td><td>@(string.IsNullOrWhiteSpace(item.Details) ? "—" : item.Details)</td></tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-xl-6">
+            <section class="report-card h-100">
+                <div class="card-body">
+                    <div class="card-heading"><h2>آخرین فاکتورها</h2><span class="card-subtitle">۵ فاکتور اخیر</span></div>
+                    @if (Model.RecentInvoices.Count == 0)
+                    {
+                        <div class="empty-state">هنوز فاکتوری ثبت نشده است.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table report-table align-middle">
+                                <thead><tr><th>تاریخ</th><th>کاربر</th><th>پلن</th><th>مبلغ</th><th>وضعیت</th></tr></thead>
+                                <tbody>
+                                @foreach (var invoice in Model.RecentInvoices)
+                                {
+                                    var statusLabel = invoice.Status switch
+                                    {
+                                        "Paid" => "پرداخت‌شده",
+                                        "Failed" => "ناموفق",
+                                        "Pending" or "PendingPayment" => "در انتظار",
+                                        "Cancelled" => "لغوشده",
+                                        "Expired" => "منقضی‌شده",
+                                        _ => invoice.Status
+                                    };
+                                    <tr><td>@invoice.CreatedAt.ToString("yyyy/MM/dd")</td><td>@invoice.UserFullName</td><td>@invoice.PlanTitle</td><td>@invoice.Amount.ToString("N0")</td><td>@statusLabel</td></tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) {
+                document.getElementById('chartLibraryWarning')?.classList.remove('d-none');
+                return;
+            }
+            const Chart = window.Chart;
+            const labels = @Html.Raw(JsonSerializer.Serialize(Model.MonthlyLabels));
+            const monthlyRevenue = @Html.Raw(JsonSerializer.Serialize(Model.MonthlyRevenues));
+            const monthlyCancellations = @Html.Raw(JsonSerializer.Serialize(Model.MonthlyCancelledSubscriptions));
+            const reasonLabels = @Html.Raw(JsonSerializer.Serialize(Model.CancellationReasons.Select(item => item.Reason)));
+            const reasonCounts = @Html.Raw(JsonSerializer.Serialize(Model.CancellationReasons.Select(item => item.Count)));
+            const numberFormatter = new Intl.NumberFormat('fa-IR');
+            const colors = ['#5264e9', '#16a37a', '#e9a63a', '#e55c70', '#2799bd', '#8a65d6'];
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+
+            new Chart(document.getElementById('monthlyRevenueChart'), {
+                type: 'line',
+                data: { labels, datasets: [{ label: 'درآمد (تومان)', data: monthlyRevenue, borderColor: '#5264e9', backgroundColor: 'rgba(82, 100, 233, .13)', fill: true, tension: .35, pointRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => numberFormatter.format(context.raw) + ' تومان' } } }, scales: { y: { beginAtZero: true, ticks: { callback: value => numberFormatter.format(value) } }, x: { grid: { display: false } } } }
+            });
+
+            new Chart(document.getElementById('monthlyCancellationsChart'), {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'تعداد فسخ', data: monthlyCancellations, backgroundColor: '#e66b7c', borderRadius: 7, maxBarThickness: 42 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+            });
+
+            const cancellationCanvas = document.getElementById('cancellationReasonsChart');
+            if (cancellationCanvas) {
+                new Chart(cancellationCanvas, {
+                    type: 'doughnut',
+                    data: { labels: reasonLabels, datasets: [{ data: reasonCounts, backgroundColor: colors, borderColor: '#fff', borderWidth: 3 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+        })();
+    </script>
+}

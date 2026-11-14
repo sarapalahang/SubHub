@@ -1,0 +1,65 @@
+@model SubHub.Admin.Models.PlanManagementViewModel
+@using SubHub.Domain.Enums
+
+@{
+    var isEdit = Model.Id > 0;
+    var actionName = isEdit ? "Edit" : "Create";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <form asp-action="@actionName" asp-route-id="@(isEdit ? Model.Id : null)" method="post">
+            @Html.AntiForgeryToken()
+            @if (isEdit)
+            {
+                <input asp-for="Id" type="hidden" />
+            }
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">عنوان پلن</label>
+                <input asp-for="Title" class="form-control" maxlength="150" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">توضیحات</label>
+                <textarea asp-for="Description" class="form-control" rows="3" maxlength="500"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Price" class="form-label">قیمت (تومان)</label>
+                    <input asp-for="Price" type="number" min="0.01" step="0.01" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="DurationType" class="form-label">نوع دوره</label>
+                    <select asp-for="DurationType" asp-items="Html.GetEnumSelectList<PlanDurationType>()" class="form-select"></select>
+                    <span asp-validation-for="DurationType" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DurationInDays" class="form-label">مدت اعتبار (روز)</label>
+                <input asp-for="DurationInDays" type="number" min="1" max="36500" class="form-control" />
+                <span asp-validation-for="DurationInDays" class="text-danger"></span>
+            </div>
+
+            @if (isEdit)
+            {
+                <div class="form-check form-switch mb-4">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">پلن در فهرست فروش فعال باشد</label>
+                </div>
+            }
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@(isEdit ? "ذخیره تغییرات" : "ثبت پلن")</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">بازگشت</a>
+            </div>
+        </form>
+    </div>
+</div>
+

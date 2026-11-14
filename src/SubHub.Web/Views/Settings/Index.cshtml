@@ -1,0 +1,43 @@
+﻿@model SubHub.Domain.Entities.SiteSetting
+
+@{
+    ViewData["Title"] = "تنظیمات اعلان‌ها";
+}
+
+<div class="container py-5" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                <h4 class="fw-bold text-primary mb-3">⚙️ تنظیمات ارسال پیامک و ایمیل</h4>
+                <p class="text-muted small mb-4">وضعیت ارسال خودکار پیامک، ایمیل و فایل PDF پس از پرداخت موفق را مدیریت کنید.</p>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                }
+
+                <form asp-action="Index" method="post">
+                    <!-- حتماً فیلد Id اینجا داخل فرم باشد -->
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="EnableSmsNotification" asp-for="EnableSmsNotification">
+                        <label class="form-check-label fw-semibold" for="EnableSmsNotification">ارسال پیامک فعال‌سازی (کاوه‌نگار)</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="EnableEmailNotification" asp-for="EnableEmailNotification">
+                        <label class="form-check-label fw-semibold" for="EnableEmailNotification">ارسال ایمیل فاکتور</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" role="switch" id="EnablePdfAttachment" asp-for="EnablePdfAttachment">
+                        <label class="form-check-label fw-semibold" for="EnablePdfAttachment">پیوست کردن فایل PDF فاکتور به ایمیل</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">ذخیره تغییرات</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

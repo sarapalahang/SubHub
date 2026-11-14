@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>c644eac7-3e4c-4b83-9ec6-751c6304a8e9</UserSecretsId>
+		<!-- اضافه کردن کد زیر برای نادیده گرفتن هشدارهای NU1902 و NU1903 -->
+		<NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.8.25" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SubHub.Application\SubHub.Application.csproj" />
+		<ProjectReference Include="..\SubHub.Domain\SubHub.Domain.csproj" />
+		<ProjectReference Include="..\SubHub.Infrastructure\SubHub.Infrastructure.csproj" />
+	</ItemGroup>
+
+</Project>

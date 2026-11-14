@@ -1,0 +1,22 @@
+﻿@model SubHub.Contracts.Invoices.PaymentCallbackResult
+
+@{
+    ViewData["Title"] = "خطا در پرداخت";
+}
+
+<div class="container text-center mt-5">
+    <div class="card border-danger">
+        <div class="card-body">
+            <h2 class="text-danger">❌ پرداخت ناموفق</h2>
+            <p class="mt-4">متأسفانه تراکنش انجام نشد یا توسط کاربر لغو گردید.</p>
+            <hr />
+            @if (!string.IsNullOrEmpty(Model?.Message))
+            {
+                <p class="text-muted">علت خطا: @Model.Message</p>
+            }
+            <div class="mt-4">
+                <a href="/" class="btn btn-warning">تلاش مجدد</a>
+            </div>
+        </div>
+    </div>
+</div>

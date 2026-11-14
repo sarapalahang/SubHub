@@ -1,0 +1,82 @@
+@model IReadOnlyList<SubHub.Admin.Models.PlanManagementViewModel>
+
+@{
+    ViewData["Title"] = "مدیریت پلن‌های اشتراک";
+}
+
+<div class="container py-4" dir="rtl" lang="fa">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">مدیریت پلن‌های اشتراک</h1>
+            <p class="text-muted mb-0">تعریف قیمت، دوره اعتبار و وضعیت عرضه پلن‌ها</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">افزودن پلن</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="status">@successMessage</div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info">هنوز پلنی تعریف نشده است.</div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>عنوان</th>
+                            <th>قیمت</th>
+                            <th>دوره</th>
+                            <th>اعتبار</th>
+                            <th>وضعیت</th>
+                            <th class="text-end">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var plan in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@plan.Title</div>
+                                    @if (!string.IsNullOrWhiteSpace(plan.Description))
+                                    {
+                                        <div class="small text-muted">@plan.Description</div>
+                                    }
+                                </td>
+                                <td>@plan.Price.ToString("N0") تومان</td>
+                                <td>@plan.DurationTypeLabel</td>
+                                <td>@plan.DurationInDays روز</td>
+                                <td>
+                                    @if (plan.IsActive)
+                                    {
+                                        <span class="badge text-bg-success">فعال</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-secondary">غیرفعال</span>
+                                    }
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-outline-primary">ویرایش</a>
+                                    @if (plan.IsActive)
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@plan.Id" method="post" class="d-inline"
+                                              onsubmit="return confirm('این پلن از فهرست فروش غیرفعال می‌شود و سوابق آن حفظ خواهد شد. ادامه می‌دهید؟');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

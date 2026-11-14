@@ -1,0 +1,57 @@
+@model SubHub.Contracts.Reports.SubscriptionCommerceReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "توزیع انواع پلن";
+    var totalSales = Model.PlanBreakdown.Sum(plan => plan.SalesCount);
+}
+
+<div class="report-page">
+    <div class="page-heading"><div><h1>توزیع انواع پلن</h1><p>درصد سهم هر پلن از کل فروش موفق اشتراک‌ها.</p></div><span class="heading-tag">مبنای گزارش: @totalSales.ToString("N0") فروش</span></div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-6"><div class="metric-card metric-purple"><span class="metric-label">کل فروش موفق</span><strong class="metric-value">@totalSales.ToString("N0")</strong><span class="metric-note">همهٔ پلن‌ها</span></div></div>
+        <div class="col-6 col-xl-6"><div class="metric-card metric-green"><span class="metric-label">تعداد پلن‌های فروخته‌شده</span><strong class="metric-value">@Model.PlanBreakdown.Count.ToString("N0")</strong><span class="metric-note">پلن دارای حداقل یک فاکتور پرداخت‌شده</span></div></div>
+    </div>
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-5"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>سهم هر پلن از فروش</h2><span class="card-subtitle">درصدی</span></div>
+            @if (Model.PlanBreakdown.Count > 0) { <div class="chart-area chart-tall"><canvas id="planSharePie" role="img" aria-label="نمودار دایره‌ای سهم پلن‌ها"></canvas></div> } else { <div class="empty-state">فروش پرداخت‌شده‌ای ثبت نشده است.</div> }
+        </div></section></div>
+        <div class="col-xl-7"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>مقایسه تعداد فروش پلن‌ها</h2><span class="card-subtitle">تعداد فاکتورهای موفق</span></div>
+            @if (Model.PlanBreakdown.Count > 0) { <div class="chart-area chart-tall"><canvas id="planShareBars" role="img" aria-label="نمودار میله‌ای فروش پلن‌ها"></canvas></div> } else { <div class="empty-state">فروش پرداخت‌شده‌ای ثبت نشده است.</div> }
+        </div></section></div>
+    </div>
+    <section class="report-card"><div class="card-body"><div class="card-heading"><h2>سهم و درآمد هر پلن</h2><span class="card-subtitle">درصد بر اساس تعداد فروش موفق</span></div>
+        @if (Model.PlanBreakdown.Count == 0) { <div class="empty-state">داده‌ای برای نمایش موجود نیست.</div> }
+        else
+        {
+            <div class="table-responsive"><table class="table report-table"><thead><tr><th>پلن</th><th>تعداد فروش</th><th>سهم از کل</th><th>درآمد</th></tr></thead><tbody>
+            @foreach (var plan in Model.PlanBreakdown)
+            {
+                var share = totalSales == 0 ? 0 : Math.Round(plan.SalesCount * 100m / totalSales, 1);
+                <tr><td>@plan.PlanTitle</td><td>@plan.SalesCount.ToString("N0")</td><td>@share.ToString("N1")٪</td><td>@plan.Revenue.ToString("N0") تومان</td></tr>
+            }
+            </tbody></table></div>
+        }
+    </div></section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) { document.getElementById('chartLibraryWarning')?.classList.remove('d-none'); return; }
+            const Chart = window.Chart;
+            const labels = @Html.Raw(JsonSerializer.Serialize(Model.PlanBreakdown.Select(item => item.PlanTitle)));
+            const values = @Html.Raw(JsonSerializer.Serialize(Model.PlanBreakdown.Select(item => item.SalesCount)));
+            const colors = ['#5264e9', '#16a37a', '#e9a63a', '#e55c70', '#2799bd', '#8a65d6', '#34a7a0'];
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            if (labels.length) {
+                new Chart(document.getElementById('planSharePie'), { type: 'pie', data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#fff', borderWidth: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+                new Chart(document.getElementById('planShareBars'), { type: 'bar', data: { labels, datasets: [{ label: 'تعداد فروش', data: values, backgroundColor: colors, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } } });
+            }
+        })();
+    </script>
+}

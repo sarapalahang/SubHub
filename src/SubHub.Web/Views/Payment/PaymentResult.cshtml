@@ -1,0 +1,51 @@
+﻿@model SubHub.Contracts.Invoices.PaymentCallbackResult
+
+@{
+    ViewData["Title"] = "نتیجه پرداخت";
+}
+
+<div class="container py-5" style="max-width: 600px;">
+    <div class="card shadow border-0 rounded-4 text-center p-4">
+        <div class="card-body">
+            @if (Model.IsSuccess)
+            {
+                <div class="text-success mb-3" style="font-size: 4rem;">✓</div>
+                <h3 class="text-success fw-bold">پرداخت موفق</h3>
+                <p class="text-muted mt-2">اشتراک شما با موفقیت فعال گردید.</p>
+            }
+            else
+            {
+                <div class="text-danger mb-3" style="font-size: 4rem;">✗</div>
+                <h3 class="text-danger fw-bold">پرداخت ناموفق</h3>
+                <p class="text-muted mt-2">تراکنش انجام نشد یا توسط کاربر لغو گردید.</p>
+            }
+
+            <hr class="my-4" />
+
+            <div class="bg-light p-3 rounded-3 text-start mb-4" dir="rtl">
+                @if (!string.IsNullOrEmpty(Model.InvoiceNumber))
+                {
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">شماره فاکتور:</span>
+                        <span class="fw-bold" dir="ltr">@Model.InvoiceNumber</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.RefId))
+                {
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">کد رهگیری بانک:</span>
+                        <span class="fw-bold text-success" dir="ltr">@Model.RefId</span>
+                    </div>
+                }
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">توضیحات:</span>
+                    <span>@Model.Message</span>
+                </div>
+            </div>
+
+            <a asp-controller="Plan" asp-action="Index" class="btn btn-primary px-4 py-2 rounded-pill">
+                بازگشت به لیست اشتراک‌ها
+            </a>
+        </div>
+    </div>
+</div>

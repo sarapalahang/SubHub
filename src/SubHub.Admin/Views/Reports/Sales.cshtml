@@ -1,0 +1,110 @@
+@model SubHub.Contracts.Reports.SubscriptionCommerceReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "گزارش فروش اشتراک";
+}
+
+<div class="report-page">
+    <div class="page-heading">
+        <div>
+            <h1>گزارش فروش اشتراک</h1>
+            <p>تعداد خریدهای موفق را در بازه‌های زمانی و پلن‌های مختلف بررسی کنید.</p>
+        </div>
+        <span class="heading-tag">کل فروش موفق: @Model.TotalSales.ToString("N0")</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3"><div class="metric-card metric-purple"><span class="metric-label">فروش امروز</span><strong class="metric-value">@Model.TodaySales.ToString("N0")</strong><span class="metric-note">فاکتور پرداخت‌شده در روز جاری</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-green"><span class="metric-label">فروش این هفته</span><strong class="metric-value">@Model.ThisWeekSales.ToString("N0")</strong><span class="metric-note">از ابتدای هفتهٔ جاری</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-blue"><span class="metric-label">فروش این ماه</span><strong class="metric-value">@Model.CurrentMonthSales.ToString("N0")</strong><span class="metric-note">فاکتورهای پرداخت‌شدهٔ ماه جاری</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-orange"><span class="metric-label">فروش امسال</span><strong class="metric-value">@Model.CurrentYearSales.ToString("N0")</strong><span class="metric-note">از ابتدای سال میلادی جاری</span></div></div>
+    </div>
+
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-7">
+            <section class="report-card"><div class="card-body">
+                <div class="card-heading"><h2>روند فروش</h2><label class="card-subtitle" for="salesPeriod">بازهٔ گزارش</label>
+                    <select id="salesPeriod" class="form-select form-select-sm" style="width:auto; min-width:130px">
+                        <option value="daily">روزانه · ۷ روز</option><option value="weekly">هفتگی · ۸ هفته</option><option value="monthly" selected>ماهانه · ۶ ماه</option><option value="annual">سالانه · ۵ سال</option>
+                    </select>
+                </div>
+                <div class="chart-area"><canvas id="salesTrendChart" role="img" aria-label="نمودار فروش در بازه‌های زمانی"></canvas></div>
+            </div></section>
+        </div>
+        <div class="col-xl-5">
+            <section class="report-card"><div class="card-body">
+                <div class="card-heading"><h2>فروش به تفکیک پلن</h2><span class="card-subtitle">مقایسه تعداد خرید</span></div>
+                <div class="chart-area"><canvas id="planSalesChart" role="img" aria-label="نمودار فروش پلن‌ها"></canvas></div>
+            </div></section>
+        </div>
+    </div>
+
+    <section class="report-card">
+        <div class="card-body">
+            <div class="card-heading"><h2>جزئیات فروش پلن‌ها</h2><span class="card-subtitle">مجموع @Model.TotalSales.ToString("N0") فروش موفق</span></div>
+            @if (Model.PlanBreakdown.Count == 0)
+            {
+                <div class="empty-state">هنوز فاکتور پرداخت‌شده‌ای برای نمایش ثبت نشده است.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table report-table align-middle">
+                        <thead><tr><th>پلن اشتراک</th><th>تعداد فروش</th><th>درآمد</th><th>سهم از فروش</th></tr></thead>
+                        <tbody>
+                        @foreach (var plan in Model.PlanBreakdown)
+                        {
+                            var share = Model.TotalSales == 0 ? 0 : Math.Round(plan.SalesCount * 100m / Model.TotalSales, 1);
+                            <tr><td><span class="plan-chip"><span class="plan-dot"></span>@plan.PlanTitle</span></td><td>@plan.SalesCount.ToString("N0")</td><td>@plan.Revenue.ToString("N0") تومان</td><td>@share.ToString("N1")٪</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) {
+                document.getElementById('chartLibraryWarning')?.classList.remove('d-none');
+                return;
+            }
+            const Chart = window.Chart;
+            const series = {
+                daily: { labels: @Html.Raw(JsonSerializer.Serialize(Model.DailyLabels)), values: @Html.Raw(JsonSerializer.Serialize(Model.DailySales)) },
+                weekly: { labels: @Html.Raw(JsonSerializer.Serialize(Model.WeeklyLabels)), values: @Html.Raw(JsonSerializer.Serialize(Model.WeeklySales)) },
+                monthly: { labels: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyLabels)), values: @Html.Raw(JsonSerializer.Serialize(Model.MonthlySales)) },
+                annual: { labels: @Html.Raw(JsonSerializer.Serialize(Model.AnnualLabels)), values: @Html.Raw(JsonSerializer.Serialize(Model.AnnualSales)) }
+            };
+            const planLabels = @Html.Raw(JsonSerializer.Serialize(Model.PlanBreakdown.Select(item => item.PlanTitle)));
+            const planSales = @Html.Raw(JsonSerializer.Serialize(Model.PlanBreakdown.Select(item => item.SalesCount)));
+            const colors = ['#5264e9', '#16a37a', '#e9a63a', '#e55c70', '#2799bd', '#8a65d6', '#34a7a0'];
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            const salesTrendChart = new Chart(document.getElementById('salesTrendChart'), {
+                type: 'bar',
+                data: { labels: series.monthly.labels, datasets: [{ label: 'فروش موفق', data: series.monthly.values, backgroundColor: '#6676ee', borderRadius: 7, maxBarThickness: 42 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+            });
+            document.getElementById('salesPeriod').addEventListener('change', event => {
+                const selected = series[event.target.value];
+                salesTrendChart.data.labels = selected.labels;
+                salesTrendChart.data.datasets[0].data = selected.values;
+                salesTrendChart.update();
+            });
+            new Chart(document.getElementById('planSalesChart'), {
+                type: 'bar',
+                data: { labels: planLabels, datasets: [{ label: 'تعداد فروش', data: planSales, backgroundColor: colors, borderRadius: 6, maxBarThickness: 30 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } } }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,46 @@
+@model SubHub.Contracts.Reports.PaymentStatusReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "وضعیت پرداخت‌ها";
+    var chartStatuses = Model.Statuses.Where(item => item.Count > 0).ToList();
+}
+
+<div class="report-page">
+    <div class="page-heading"><div><h1>وضعیت پرداخت‌ها</h1><p>تعداد و مبلغ فاکتورها به تفکیک نتیجهٔ پرداخت.</p></div><span class="heading-tag">مجموع مبالغ فاکتورها: @Model.TotalAmount.ToString("N0") تومان</span></div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-4"><div class="metric-card metric-purple"><span class="metric-label">کل فاکتورها</span><strong class="metric-value">@Model.TotalPayments.ToString("N0")</strong><span class="metric-note">همهٔ وضعیت‌ها</span></div></div>
+        <div class="col-6 col-xl-4"><div class="metric-card metric-green"><span class="metric-label">پرداخت‌های موفق</span><strong class="metric-value">@Model.Statuses.First(item => item.StatusCode == "Paid").Count.ToString("N0")</strong><span class="metric-note">فاکتورهای پرداخت‌شده</span></div></div>
+        <div class="col-12 col-xl-4"><div class="metric-card metric-orange"><span class="metric-label">پرداخت‌های در انتظار</span><strong class="metric-value">@Model.Statuses.First(item => item.StatusCode == "Pending").Count.ToString("N0")</strong><span class="metric-note">در انتظار نتیجهٔ پرداخت</span></div></div>
+    </div>
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+    <div class="row g-3">
+        <div class="col-xl-5"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>توزیع تعداد پرداخت‌ها</h2><span class="card-subtitle">به تفکیک وضعیت</span></div><div class="chart-area chart-tall"><canvas id="paymentStatusChart" role="img" aria-label="نمودار وضعیت پرداخت‌ها"></canvas></div></div></section></div>
+        <div class="col-xl-7"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>جدول وضعیت پرداخت‌ها</h2><span class="card-subtitle">مبلغ هر ردیف، مبلغ فاکتورهای همان وضعیت است</span></div>
+            <div class="table-responsive"><table class="table report-table"><thead><tr><th>وضعیت</th><th>تعداد</th><th>مجموع مبلغ</th></tr></thead><tbody>
+            @foreach (var item in Model.Statuses)
+            {
+                <tr><td>@item.StatusLabel</td><td>@item.Count.ToString("N0")</td><td>@item.Amount.ToString("N0") تومان</td></tr>
+            }
+            </tbody><tfoot><tr><th>جمع کل</th><th>@Model.TotalPayments.ToString("N0")</th><th>@Model.TotalAmount.ToString("N0") تومان</th></tr></tfoot></table></div>
+        </div></section></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) { document.getElementById('chartLibraryWarning')?.classList.remove('d-none'); return; }
+            const Chart = window.Chart;
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            new Chart(document.getElementById('paymentStatusChart'), {
+                type: 'pie',
+                data: { labels: @Html.Raw(JsonSerializer.Serialize(chartStatuses.Select(item => item.StatusLabel))), datasets: [{ data: @Html.Raw(JsonSerializer.Serialize(chartStatuses.Select(item => item.Count))), backgroundColor: ['#16a37a', '#e55c70', '#8691a5', '#e9a63a', '#2799bd'], borderColor: '#fff', borderWidth: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        })();
+    </script>
+}

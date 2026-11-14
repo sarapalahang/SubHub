@@ -1,0 +1,47 @@
+@model SubHub.Contracts.Reports.ExpiryNotificationReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "اطلاع‌رسانی اتمام اشتراک";
+    var totalSms = Model.SmsSucceeded + Model.SmsFailed;
+    var totalEmail = Model.EmailSucceeded + Model.EmailFailed;
+}
+
+<div class="report-page">
+    <div class="page-heading"><div><h1>گزارش اطلاع‌رسانی اتمام اشتراک</h1><p>وضعیت تلاش‌های ثبت‌شده برای ارسال پیامک و ایمیل یادآوری.</p></div><span class="heading-tag">موفقیت پس از پاسخ موفق سرویس ارسال ثبت می‌شود</span></div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3"><div class="metric-card metric-purple"><span class="metric-label">پیامک موفق</span><strong class="metric-value">@Model.SmsSucceeded.ToString("N0")</strong><span class="metric-note">از @totalSms.ToString("N0") تلاش</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-red"><span class="metric-label">پیامک ناموفق</span><strong class="metric-value">@Model.SmsFailed.ToString("N0")</strong><span class="metric-note">از @totalSms.ToString("N0") تلاش</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-green"><span class="metric-label">ایمیل موفق</span><strong class="metric-value">@Model.EmailSucceeded.ToString("N0")</strong><span class="metric-note">از @totalEmail.ToString("N0") تلاش</span></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card metric-orange"><span class="metric-label">ایمیل ناموفق</span><strong class="metric-value">@Model.EmailFailed.ToString("N0")</strong><span class="metric-note">از @totalEmail.ToString("N0") تلاش</span></div></div>
+    </div>
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-5"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>نتیجهٔ ارسال‌ها</h2><span class="card-subtitle">به تفکیک کانال و وضعیت</span></div><div class="chart-area chart-short"><canvas id="expiryNotificationPie" role="img" aria-label="نمودار وضعیت ارسال پیامک و ایمیل"></canvas></div></div></section></div>
+        <div class="col-xl-7"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>تعداد تلاش‌های ارسال</h2><span class="card-subtitle">شش ماه اخیر</span></div><div class="chart-area chart-short"><canvas id="expiryNotificationTrend" role="img" aria-label="نمودار ماهانه تلاش پیامک و ایمیل"></canvas></div></div></section></div>
+    </div>
+    <section class="report-card"><div class="card-body"><div class="card-heading"><h2>جدول وضعیت ارسال</h2><span class="card-subtitle">نتایج از سوابق تلاش‌های Job</span></div>
+        @if (Model.Statuses.Count == 0) { <div class="empty-state">هنوز تلاشی برای ارسال یادآوری ثبت نشده است.</div> }
+        else
+        {
+            <div class="table-responsive"><table class="table report-table"><thead><tr><th>کانال</th><th>نتیجه</th><th>تعداد تلاش‌ها</th></tr></thead><tbody>
+            @foreach (var item in Model.Statuses) { <tr><td>@item.ChannelLabel</td><td>@item.StatusLabel</td><td>@item.Count.ToString("N0")</td></tr> }
+            </tbody></table></div>
+        }
+    </div></section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) { document.getElementById('chartLibraryWarning')?.classList.remove('d-none'); return; }
+            const Chart = window.Chart;
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            new Chart(document.getElementById('expiryNotificationPie'), { type: 'doughnut', data: { labels: @Html.Raw(JsonSerializer.Serialize(Model.Statuses.Select(item => item.ChannelLabel + " - " + item.StatusLabel))), datasets: [{ data: @Html.Raw(JsonSerializer.Serialize(Model.Statuses.Select(item => item.Count))), backgroundColor: ['#16a37a', '#e55c70', '#2799bd', '#e9a63a'], borderColor: '#fff', borderWidth: 3 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } } });
+            new Chart(document.getElementById('expiryNotificationTrend'), { type: 'bar', data: { labels: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyLabels)), datasets: [{ label: 'پیامک', data: @Html.Raw(JsonSerializer.Serialize(Model.MonthlySms)), backgroundColor: '#5264e9', borderRadius: 5 }, { label: 'ایمیل', data: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyEmail)), backgroundColor: '#43bf9a', borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } } });
+        })();
+    </script>
+}

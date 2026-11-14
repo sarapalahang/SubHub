@@ -1,0 +1,25 @@
+﻿@model SubHub.Contracts.Invoices.PaymentCallbackResult
+
+@{
+    ViewData["Title"] = "پرداخت موفق";
+}
+
+<div class="container text-center mt-5">
+    <div class="card border-success shadow-sm">
+        <div class="card-body">
+            <h2 class="text-success mb-3">✅ پرداخت با موفقیت انجام شد</h2>
+            <p class="lead">کاربر گرامی، اشتراک شما با موفقیت فعال گردید.</p>
+            <hr />
+            <div class="text-right d-inline-block text-start bg-light p-3 rounded mb-3">
+                <p class="mb-1"><strong>شماره فاکتور:</strong> @Model.InvoiceNumber</p>
+                <p class="mb-0"><strong>کد پیگیری بانکی:</strong> @Model.RefId</p>
+            </div>
+            <div class="mt-4">
+                <a href="/" class="btn btn-primary px-4">بازگشت به پنل کاربری</a>
+            </div>
+        </div>
+    </div>
+    <p class="text-muted mt-3">
+        <small>رسید فاکتور و جزئیات اشتراک شما از طریق ایمیل و پیامک ارسال شد.</small>
+    </p>
+</div>

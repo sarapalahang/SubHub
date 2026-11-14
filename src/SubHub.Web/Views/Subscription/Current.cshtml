@@ -1,0 +1,121 @@
+﻿@model CurrentSubscriptionViewModel
+@addTagHelper *, SubHub.Web
+
+@{
+    ViewData["Title"] = "اشتراک‌های جاری";
+}
+
+<div class="container py-5" style="direction: rtl;">
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <h2 class="fw-bold mb-4 text-success">وضعیت اشتراک شما</h2>
+
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="alert alert-success" role="alert">@successMessage</div>
+        }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="alert alert-danger" role="alert">@errorMessage</div>
+        }
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <strong>نام طرح:</strong>
+                <span class="fs-5 text-primary ms-2">@(Model.PlanTitle ?? Model.PlanName)</span>
+            </div>
+
+            <div class="col-md-6">
+                <strong>وضعیت:</strong>
+                @if (Model.Status == SubHub.Domain.Enums.SubscriptionStatus.Cancelled)
+                {
+                    <span class="badge bg-danger fs-6">فسخ شده</span>
+                }
+                else if (Model.Status == SubHub.Domain.Enums.SubscriptionStatus.Suspended)
+                {
+                    <span class="badge bg-warning text-dark fs-6">معلق</span>
+                }
+                else if (Model.Status == SubHub.Domain.Enums.SubscriptionStatus.Expired || !Model.IsActiveNow)
+                {
+                    <span class="badge bg-secondary fs-6">منقضی شده</span>
+                }
+                else
+                {
+                    <span class="badge bg-success fs-6">فعال</span>
+                }
+            </div>
+
+            <div class="col-md-6">
+                <strong>تاریخ شروع:</strong>
+                <display-persian-date date="@Model.StartDateUtc" class="ms-2"></display-persian-date>
+            </div>
+
+            <div class="col-md-6">
+                <strong>تاریخ پایان (انقضا):</strong>
+                <display-persian-date date="@Model.EndDateUtc" class="ms-2 fw-bold text-danger"></display-persian-date>
+            </div>
+
+            @if (Model.Amount.HasValue)
+            {
+                <div class="col-md-6">
+                    <strong>مبلغ پرداخت شده:</strong>
+                    <span class="ms-2">@Model.Amount.Value.ToString("N0") تومان</span>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.InvoiceNumber))
+            {
+                <div class="col-md-6">
+                    <strong>شماره فاکتور:</strong>
+                    <span class="ms-2">@Model.InvoiceNumber</span>
+                </div>
+            }
+        </div>
+
+        @if (Model.Status == SubHub.Domain.Enums.SubscriptionStatus.Cancelled)
+        {
+            <div class="alert alert-light border mt-4 mb-0">
+                <strong>دلیل فسخ:</strong> @Model.CancellationReasonLabel
+                @if (!string.IsNullOrWhiteSpace(Model.CancellationReasonDetails))
+                {
+                    <div class="mt-2">@Model.CancellationReasonDetails</div>
+                }
+            </div>
+        }
+
+        @if (Model.CanCancel)
+        {
+            <form asp-controller="Subscription" asp-action="Cancel" method="post"
+                  class="border rounded-3 p-3 mt-4"
+                  onsubmit="return confirm('با فسخ اشتراک، دسترسی شما بلافاصله قطع می‌شود. ادامه می‌دهید؟');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="subscriptionId" value="@Model.SubscriptionId" />
+                <h3 class="h5 fw-bold">فسخ اشتراک</h3>
+                <p class="text-muted mb-3">فسخ بلافاصله اعمال می‌شود و دسترسی اشتراک را متوقف می‌کند.</p>
+
+                <div class="mb-3">
+                    <label for="cancellationReason" class="form-label">دلیل انصراف</label>
+                    <select id="cancellationReason" name="reason" class="form-select" required>
+                        <option value="">یک دلیل انتخاب کنید</option>
+                        <option value="1">هزینه اشتراک بالا بود</option>
+                        <option value="2">امکانات موردنیازم را نداشت</option>
+                        <option value="3">مشکل فنی داشتم</option>
+                        <option value="4">دیگر به سرویس نیاز ندارم</option>
+                        <option value="5">دلیل دیگر</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="reasonDetails" class="form-label">توضیحات (اختیاری؛ برای «دلیل دیگر» الزامی است)</label>
+                    <textarea id="reasonDetails" name="reasonDetails" class="form-control" rows="3" maxlength="500"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-outline-danger">تأیید فسخ اشتراک</button>
+            </form>
+        }
+
+        <div class="mt-5 d-flex gap-2">
+            <a href="/" class="btn btn-secondary px-4">بازگشت به داشبورد</a>
+            <a href="/Invoice/PurchaseHistory" class="btn btn-outline-primary px-4">تاریخچه خرید</a>
+        </div>
+    </div>
+</div>

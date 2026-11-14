@@ -1,0 +1,49 @@
+@model SubHub.Contracts.Reports.DashboardReportDto
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "فسخ و انصراف اشتراک";
+    var cancellationReasons = Model.CancellationReasons.Where(item => item.Count > 0).ToList();
+}
+
+<div class="report-page">
+    <div class="page-heading"><div><h1>فسخ و انصراف اشتراک</h1><p>روند فسخ‌ها و دلایل ثبت‌شده توسط کاربران.</p></div><span class="heading-tag">نرخ فسخ: @Model.CancellationRatePercentage.ToString("N2")٪</span></div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-4"><div class="metric-card metric-purple"><span class="metric-label">کل اشتراک‌ها</span><strong class="metric-value">@Model.TotalSubscriptions.ToString("N0")</strong><span class="metric-note">همهٔ وضعیت‌ها</span></div></div>
+        <div class="col-6 col-xl-4"><div class="metric-card metric-red"><span class="metric-label">فسخ‌شده</span><strong class="metric-value">@Model.CancelledSubscriptionsCount.ToString("N0")</strong><span class="metric-note">درصدی از کل اشتراک‌ها</span></div></div>
+        <div class="col-12 col-xl-4"><div class="metric-card metric-orange"><span class="metric-label">دلایل ثبت‌شده</span><strong class="metric-value">@cancellationReasons.Sum(item => item.Count).ToString("N0")</strong><span class="metric-note">برای فسخ‌های دارای دلیل</span></div></div>
+    </div>
+    <div id="chartLibraryWarning" class="alert alert-warning chart-library-warning d-none" role="alert">کتابخانه نمودار بارگذاری نشد. اتصال اینترنت مرورگر را بررسی و صفحه را تازه‌سازی کنید.</div>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-7"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>روند فسخ ماهانه</h2><span class="card-subtitle">شش ماه اخیر</span></div><div class="chart-area"><canvas id="cancellationTrendChart" role="img" aria-label="نمودار روند فسخ ماهانه"></canvas></div></div></section></div>
+        <div class="col-xl-5"><section class="report-card h-100"><div class="card-body"><div class="card-heading"><h2>دلایل انصراف</h2><span class="card-subtitle">توزیع موارد ثبت‌شده</span></div>
+            @if (cancellationReasons.Count > 0) { <div class="chart-area"><canvas id="cancellationReasonChart" role="img" aria-label="نمودار دلایل انصراف"></canvas></div> } else { <div class="empty-state">هنوز دلیلی ثبت نشده است.</div> }
+        </div></section></div>
+    </div>
+    <section class="report-card"><div class="card-body"><div class="card-heading"><h2>آخرین انصراف‌ها</h2><span class="card-subtitle">تا ۱۰ مورد اخیر</span></div>
+        @if (Model.RecentCancellations.Count == 0) { <div class="empty-state">فسخی برای نمایش وجود ندارد.</div> }
+        else
+        {
+            <div class="table-responsive"><table class="table report-table"><thead><tr><th>تاریخ</th><th>پلن</th><th>دلیل</th><th>توضیحات</th></tr></thead><tbody>
+            @foreach (var item in Model.RecentCancellations) { <tr><td>@(item.CancelledAtUtc?.ToString("yyyy/MM/dd") ?? "—")</td><td>@item.PlanTitle</td><td>@item.Reason</td><td>@(string.IsNullOrWhiteSpace(item.Details) ? "—" : item.Details)</td></tr> }
+            </tbody></table></div>
+        }
+    </div></section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            if (!window.Chart) { document.getElementById('chartLibraryWarning')?.classList.remove('d-none'); return; }
+            const Chart = window.Chart;
+            const colors = ['#5264e9', '#16a37a', '#e9a63a', '#e55c70', '#2799bd', '#8a65d6'];
+            Chart.defaults.font.family = 'Tahoma, sans-serif';
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.legend.textDirection = 'rtl';
+            new Chart(document.getElementById('cancellationTrendChart'), { type: 'line', data: { labels: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyLabels)), datasets: [{ label: 'تعداد فسخ', data: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyCancelledSubscriptions)), borderColor: '#e55c70', backgroundColor: 'rgba(229,92,112,.13)', fill: true, tension: .3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } } });
+            const reasonCanvas = document.getElementById('cancellationReasonChart');
+            if (reasonCanvas) new Chart(reasonCanvas, { type: 'doughnut', data: { labels: @Html.Raw(JsonSerializer.Serialize(cancellationReasons.Select(item => item.Reason))), datasets: [{ data: @Html.Raw(JsonSerializer.Serialize(cancellationReasons.Select(item => item.Count))), backgroundColor: colors, borderColor: '#fff', borderWidth: 3 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } } });
+        })();
+    </script>
+}

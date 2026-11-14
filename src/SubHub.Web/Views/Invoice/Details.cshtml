@@ -1,0 +1,65 @@
+﻿@model SubHub.Domain.Entities.Invoice
+
+@{
+    ViewData["Title"] = "مشاهده فاکتور";
+}
+
+<div class="container py-5" style="max-width: 700px; direction: rtl; text-align: right;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">فاکتور پرداخت SubHub</h5>
+            <span class="badge bg-light text-dark">@Model.InvoiceNumber</span>
+        </div>
+        <div class="card-body p-4">
+            <div class="row mb-3">
+                <div class="col-6">
+                    <p class="text-muted mb-1">وضعیت پرداخت:</p>
+                    @if (Model.Status == SubHub.Domain.Enums.InvoiceStatus.Paid)
+                    {
+                        <span class="badge bg-success fs-6">پرداخت موفق</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark fs-6">@Model.Status</span>
+                    }
+                </div>
+                <div class="col-6 text-start">
+                    <p class="text-muted mb-1">تاریخ پرداخت:</p>
+                    <strong>@(Model.PaidAtUtc.HasValue ? Model.PaidAtUtc.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm") : "-")</strong>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="table-responsive my-3">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>عنوان پلن</th>
+                            <th>کد پیگیری (RefId)</th>
+                            <th class="text-start">مبلغ پرداختی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@(Model.Plan?.Title ?? "اشتراک")</td>
+                            <td>@(string.IsNullOrEmpty(Model.RefId) ? "-" : Model.RefId)</td>
+                            <td class="text-start font-monospace fw-bold">@Model.Amount.ToString("N0") تومان</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info d-flex justify-content-between align-items-center mt-4">
+                <span>اشتراک با موفقیت روی حساب کاربری شما فعال است.</span>
+                <div>
+                    <a asp-controller="Invoice" asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-success btn-sm me-2">
+                        <i class="bi bi-file-earmark-pdf"></i> دانلود PDF
+                    </a>
+                    <button onclick="window.print()" class="btn btn-outline-primary btn-sm">چاپ فاکتور</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
