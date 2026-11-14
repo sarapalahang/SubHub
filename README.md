@@ -1,6 +1,26 @@
 # SubHub
 
-SubHub is a subscription management platform built with ASP.NET Core MVC and SQL Server. It includes a customer-facing subscription and payment flow, an administrator dashboard, subscription plan management, sales and payment reports, cancellation tracking, and Hangfire jobs for invoice reconciliation and subscription-expiry notifications.
+SubHub is a portfolio project for managing subscription plans, customer subscriptions, invoices, and payments. It includes a customer-facing ASP.NET Core MVC application, a separate admin portal, reporting dashboards, and background jobs for invoice reconciliation and subscription-expiry notifications.
+
+## Features
+
+- Customer sign-in and subscription purchase flow
+- Subscription plan management in the admin portal
+- Invoice and payment workflows with ZarinPal integration
+- Sales, revenue, payment, active-user, cancellation, and expiry-notification reports
+- Hangfire jobs for reconciling pending invoices and notifying users about expiring subscriptions
+- SMS and email notification integrations
+
+## Architecture
+
+The solution uses a layered design inspired by Onion Architecture. The domain is kept separate from the web applications, while application services and infrastructure implementations are organized into their own projects.
+
+- **Domain** contains the core entities and enums.
+- **Application** contains business services and application-facing interfaces.
+- **Infrastructure** implements database access and external integrations such as payments, SMS, email, and PDF generation.
+- **Contracts** contains shared request, response, and reporting models.
+- **Web** is the customer-facing site and hosts the background jobs.
+- **Admin** is the management portal for plans, settings, and reports.
 
 ## Technology
 
@@ -10,6 +30,7 @@ SubHub is a subscription management platform built with ASP.NET Core MVC and SQL
 - Chart.js dashboard and reports
 - ZarinPal payment gateway integration
 - Kavenegar SMS and SMTP email integrations
+- QuestPDF for PDF generation
 
 ## Projects
 
