@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "تایید کد";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        margin: 0;
+        min-height: 100vh;
+    }
+
+    .page-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 80px);
+        padding: 20px;
+    }
+
+    .verify-card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 24px;
+        padding: 35px 28px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        text-align: center;
+        width: 100%;
+        max-width: 430px;
+    }
+
+    .verify-icon {
+        width: 70px;
+        height: 70px;
+        background: #6c63ff;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 30px;
+    }
+
+    .otp-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 22px;
+        direction: ltr;
+    }
+
+    .otp-box {
+        width: 50px;
+        height: 58px;
+        border: 2px solid #d1d5db;
+        border-radius: 14px;
+        text-align: center;
+        font-size: 24px;
+        outline: none;
+    }
+
+    .btn-verify {
+        width: 100%;
+        border: none;
+        border-radius: 14px;
+        padding: 14px;
+        color: white;
+        background: #6c63ff;
+        font-weight: bold;
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="verify-card">
+        <div class="verify-icon">🔐</div>
+        <div class="verify-title" style="font-weight:bold; margin-bottom:10px;">تایید کد ورود</div>
+        <div class="verify-subtitle" style="margin-bottom:20px;">کد ارسال شده به @ViewBag.PhoneNumber را وارد کنید</div>
+
+        <form asp-action="VerifySmsOtp" method="post" id="otpForm">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="phoneNumber" value="@ViewBag.PhoneNumber" />
+            <input type="hidden" name="code" id="finalCode" />
+            <div class="otp-container">
+                <input type="text" class="otp-box" maxlength="1" />
+                <input type="text" class="otp-box" maxlength="1" />
+                <input type="text" class="otp-box" maxlength="1" />
+                <input type="text" class="otp-box" maxlength="1" />
+                <input type="text" class="otp-box" maxlength="1" />
+                <input type="text" class="otp-box" maxlength="1" />
+            </div>
+            <button type="submit" class="btn-verify">تایید و ورود</button>
+        </form>
+        <a asp-action="Role" style="display:block; margin-top:15px; color:#666;">ویرایش شماره</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const inputs = document.querySelectorAll('.otp-box');
+        const finalCode = document.getElementById('finalCode');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length > 0 && index < 5) inputs[index + 1].focus();
+                finalCode.value = Array.from(inputs).map(i => i.value).join('');
+            });
+        });
+    </script>
+}
+
+
+
+
+

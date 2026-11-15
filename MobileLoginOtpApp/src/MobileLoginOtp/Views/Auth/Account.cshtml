@@ -1,0 +1,129 @@
+﻿@model MobileLoginOtp.Application.Dtos.ViewModels.ProfileViewModel
+@addTagHelper *, MobileLoginOtp
+@{
+    ViewData["Title"] = "ویرایش پروفایل";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm p-4" style="max-width: 500px; margin: auto;">
+        <div class="text-center mb-4">
+            <h4 class="fw-bold">ویرایش پروفایل کاربری</h4>
+        </div>
+
+        <form asp-controller="Auth" asp-action="SaveProfile" method="post" enctype="multipart/form-data">
+                                   <!-- بخش نمایش و آپلود عکس -->
+            <div class="text-center mb-4">
+                <div class="mb-2">
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <!-- نمایش عکس فعلی -->
+                        <img src="@Model.ImagePath" class="rounded-circle img-thumbnail" style="width: 320px; height: 320px; object-fit: cover;" alt="تصویر پروفایل" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-circle text-secondary" style="font-size: 100px;"></i>
+                    }
+                </div>
+
+                <!-- دکمه برای باز کردن فایل انتخاب‌گر -->
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="document.getElementById('ProfilePicture').click();">
+                    انتخاب عکس جدید
+                </button>
+
+                <!-- نمایش نام فایلی که کاربر انتخاب کرده -->
+                <span id="fileNameDisplay" class="text-muted d-block small mt-1">فایلی انتخاب نشده</span>
+
+                <!-- ورودی فایل اصلی (مخفی) -->
+                <input asp-for="ProfilePicture" type="file" id="ProfilePicture" class="d-none" accept="image/*" onchange="updateFileName(this)" />
+
+                <span asp-validation-for="ProfilePicture" class="text-danger small d-block"></span>
+            </div>
+
+            @section Scripts {
+                <script>
+                    function updateFileName(input) {
+                        const display = document.getElementById('fileNameDisplay');
+                        if (input.files && input.files.length > 0) {
+                            display.innerText = input.files[0].name; // نمایش نام فایل انتخاب شده
+                        } else {
+                            display.innerText = "فایلی انتخاب نشده";
+                        }
+                    }
+                </script>
+
+                <script>
+                    $(document).ready(function () {
+                        $(".persian-date").persianDatepicker({
+                            format: "YYYY/MM/DD",
+                            autoClose: true
+                        });
+                    });
+                </script>
+            }
+
+
+            <!-- اطلاعات متنی -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">شماره تماس )</label>
+                <div class="input-group">
+                    <input asp-for="PhoneNumber" class="form-control"  />
+                    <span class="input-group-text @(Model.PhoneConfirmed ? "text-success" : "text-warning")">
+                        <i class="bi @(Model.PhoneConfirmed ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill")"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">نام</label>
+                <input asp-for="FirstName" class="form-control" placeholder="نام خود را وارد کنید" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">نام خانوادگی</label>
+                <input asp-for="LastName" class="form-control" placeholder="نام خانوادگی را وارد کنید" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">تاریخ تولد</label>
+                <persian-date-picker asp-for="BirthDate"></persian-date-picker>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">ایمیل</label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="example@mail.com" />
+            </div>
+
+            <!-- دکمه ذخیره تغییرات -->
+            <button type="submit" class="btn btn-primary w-100 mb-3 shadow-sm" style="border-radius: 10px;">
+                <i class="bi bi-save me-1"></i> ذخیره تغییرات
+            </button>
+        </form>
+          <div class="mt-2">
+            <form asp-controller="Payment" asp-action="RequestPayment" method="post" class="w-100">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="amount" value="1000" />
+
+                <button type="submit" class="btn btn-warning w-100 shadow-sm" style="border-radius: 10px;">
+                    عضویت و پرداخت
+                </button>
+            </form>
+        </div>
+            <div class="text-center mt-2">
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="w-100">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger w-100 shadow-sm" style="border-radius: 10px;">
+                        <i class="bi bi-box-arrow-right me-1"></i> خروج از حساب کاربری
+                    </button>
+                </form>
+            </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="mt-2">
+                <a asp-controller="Role" asp-action="Index" class="btn btn-info w-100 text-white shadow-sm" style="border-radius: 10px;">
+                    <i class="bi bi-shield-lock me-1"></i> مدیریت نقش‌ها
+                </a>
+            </div>
+        }
+    </div> <!-- پایان Card -->
+</div> <!-- پایان Container -->
+
+

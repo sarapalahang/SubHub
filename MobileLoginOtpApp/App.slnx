@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MobileLoginOtp.Application/MobileLoginOtp.Application.csproj" Id="e88fad8e-5372-42ff-9f40-70050c03ab1c" />
+    <Project Path="src/MobileLoginOtp.Damain/MobileLoginOtp.Domain.csproj" Id="6edac39c-0302-4988-9b1e-c12b53f986d2" />
+    <Project Path="src/MobileLoginOtp.Infrastructure/MobileLoginOtp.Infrastructure.csproj" Id="1bd1bbe5-9b9e-4ba3-87a2-5fe1d3b2a26a" />
+    <Project Path="src/MobileLoginOtp/MobileLoginOtp.csproj" Id="31e8f1ac-58b3-4631-a48f-e5cb0ee2f7d2" />
+  </Folder>
+  <Folder Name="/test/" />
+  <Project Path="MobileLoginOtp.Api/MobileLoginOtp.Api.csproj" Id="7e236e57-fab3-4283-ae7a-15ffb32c3fae" />
+  <Project Path="src/MobileLoginOtp.WinForms/MobileLoginOtp.WinForms.csproj" />
+</Solution>

@@ -1,0 +1,301 @@
+﻿@model IEnumerable<MobileLoginOtp.Domain.Entities.Role>
+
+
+@{
+    ViewData["Title"] = "مدیریت نقش‌ها";
+    var roleCount = Model?.Count() ?? 0;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    body {
+        background: #f4f7fb;
+        font-family: 'Vazirmatn', Tahoma, sans-serif;
+    }
+
+    .page-title {
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .soft-card {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .gradient-header {
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        color: white;
+        border-radius: 18px 18px 0 0;
+    }
+
+    .count-box {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 18px rgba(16,185,129,0.25);
+    }
+
+    .search-box {
+        border-radius: 12px;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+    }
+
+    .table thead th {
+        background-color: #111827;
+        color: white;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .table tbody tr:hover {
+            background-color: #eef6ff;
+            transform: scale(1.003);
+        }
+
+    .role-badge {
+        font-size: 14px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-weight: 600;
+    }
+
+    .btn-custom {
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .form-control {
+        border-radius: 12px;
+    }
+
+    .section-space {
+        margin-top: 25px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title">
+            <i class="fa-solid fa-user-shield me-2 text-primary"></i>
+            مدیریت نقش‌ها
+        </h2>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="count-box">
+                <h5><i class="fa-solid fa-layer-group me-2"></i>تعداد کل نقش‌ها</h5>
+                <h2 class="mt-2">@roleCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card soft-card mb-4">
+        <div class="card-header gradient-header py-3">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-plus me-2"></i>
+                افزودن نقش جدید
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                <div class="row g-3">
+                    <div class="col-md-9">
+                        <input name="Name" class="form-control form-control-lg" placeholder="نام نقش را وارد کنید..." />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-success btn-lg w-100 btn-custom">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>
+                            ثبت نقش
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card soft-card">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-table me-2"></i>
+                لیست نقش‌ها
+            </h5>
+            <div style="width: 280px;">
+                <input type="text" id="roleSearch" class="form-control search-box" placeholder="جستجوی نقش..." />
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="roleTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">#</th>
+                            <th>نام نقش</th>
+                            <th style="width: 220px;">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var role in Model)
+                            {
+                                <tr>
+                                    <td>@role.Id</td>
+                                    <td>
+                                        <span class="role-badge">
+                                            <i class="fa-solid fa-user-tag me-1"></i>
+                                            @role.Name
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@role.Id" class="btn btn-warning btn-sm btn-custom me-2">
+                                            <i class="fa-solid fa-pen-to-square me-1"></i>
+                                            ویرایش
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="javascript:void(0)"
+                                           data-id="@role.Id"
+                                           class="btn btn-danger btn-sm btn-custom delete-btn">
+                                            <i class="fa-solid fa-trash me-1"></i> حذف
+                                        </a>
+                                    
+                                    </td>
+
+
+                                        @* <a asp-action="Delete" asp-route-id="@role.Id" class="btn btn-danger btn-sm btn-custom">
+                                            <i class="fa-solid fa-trash me-1"></i>
+                                            حذف
+                                        </a> *@
+                                    
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-circle-info me-2"></i>
+                                    هیچ نقشی یافت نشد.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-space">
+                <h5 class="mb-3 text-secondary">
+                    <i class="fa-solid fa-list me-2"></i>
+                    اسامی نقش‌ها
+                </h5>
+
+                @if (Model != null && Model.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var role in Model)
+                        {
+                            <span class="badge bg-primary p-2 px-3 fs-6">@role.Name</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">نقشی برای نمایش وجود ندارد.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @* <script src="~/lib/sweetalert/sweetalert2@11.js"></script> *@
+    <script>
+        // استفاده از تابع برای اطمینان از اینکه کد بعد از لود شدن صفحه اجرا می‌شود
+        $(document).ready(function () {
+
+            console.log("Script Loaded!"); // برای تست در کنسول مرورگر
+
+            $(document).on('click', '.delete-btn', function (e) {
+                e.preventDefault();
+
+                var id = $(this).data('id');
+                var btn = $(this);
+
+                console.log("Button clicked, ID:", id); // برای تست در کنسول
+
+                if (!id) {
+                    alert("خطا: آیدی یافت نشد!");
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'آیا مطمئن هستید؟',
+                    text: "این نقش حذف خواهد شد!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'بله، حذف کن!',
+                    cancelButtonText: 'انصراف'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Role/Delete/' + id, // حتماً چک کنید Role در کنترلر شما همین است یا Roles
+                            type: 'POST',
+                            success: function (res) {
+                                if (res.success) {
+                                    Swal.fire('حذف شد!', 'نقش با موفقیت حذف شد.', 'success');
+                                    // حذف سطر از جدول با انیمیشن
+                                    btn.closest('tr').fadeOut(500);
+                                } else {
+                                    Swal.fire('خطا!', res.message || 'خطایی رخ داد', 'error');
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("AJAX Error:", error);
+                                console.error("Response Text:", xhr.responseText);
+                                Swal.fire('خطا!', 'ارتباط با سرور برقرار نشد (Error 404 or 500)', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+
+
+@* <script>
+    document.getElementById("roleSearch").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#roleTable tbody tr");
+
+        rows.forEach(function (row) {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+        });
+    });
+// </script> *@
+
+
+
+
+
+
+
+

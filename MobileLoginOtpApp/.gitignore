@@ -1,0 +1,23 @@
+﻿# Build output and Visual Studio state
+**/bin/
+**/obj/
+.vs/
+**/.vs/
+
+# User-specific settings
+**/*.user
+**/*.suo
+*.slnLaunch.user
+
+# Local credentials and environment files
+**/.env
+**/.env.*
+**/secrets.json
+/src/MobileLoginOtp/appsettings.json
+/src/MobileLoginOtp/appsettings.Development.json
+/MobileLoginOtp.Api/appsettings.Development.json
+
+# Uploaded user data; keep only the default profile placeholder
+**/wwwroot/uploads/**
+!**/wwwroot/uploads/profiles/
+!**/wwwroot/uploads/profiles/default-user.png

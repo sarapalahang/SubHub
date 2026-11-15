@@ -1,0 +1,600 @@
+﻿@model MobileLoginOtp.Application.Dtos.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "ورود";
+}
+
+<style>
+    body {
+        background: linear-gradient(180deg, #f4f7f6 0%, #eef1ff 100%);
+        margin: 0;
+        min-height: 100vh;
+    }
+
+    .page-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 80px);
+        padding: 24px 16px;
+    }
+
+    .auth-card {
+        background: #fff;
+        padding: 2.25rem;
+        border-radius: 22px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.10);
+        width: 100%;
+        max-width: 480px;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .auth-title {
+        text-align: center;
+        font-weight: 800;
+        margin-bottom: 6px;
+        font-size: 1.7rem;
+        color: #222;
+        letter-spacing: -0.2px;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        color: #6b7280;
+        margin-bottom: 18px;
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .nav-tabs {
+        border-bottom: none;
+        margin-bottom: 18px;
+        display: flex;
+        gap: 10px;
+        padding: 6px;
+        background: #f6f7fb;
+        border-radius: 16px;
+    }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: #334155;
+            font-weight: 700;
+            flex: 1;
+            padding: 10px 12px;
+            transition: 0.2s ease;
+        }
+
+            .nav-tabs .nav-link:hover {
+                background: rgba(108, 99, 255, 0.10);
+            }
+
+            .nav-tabs .nav-link.active {
+                background: #6c63ff;
+                color: #fff;
+                box-shadow: 0 8px 16px rgba(108, 99, 255, 0.25);
+            }
+
+    .form-control {
+        border: 2px solid #e7e7ef;
+        border-radius: 14px;
+        padding: 12px 14px;
+        text-align: center;
+        font-size: 1rem;
+        background: #fbfbfd;
+        transition: 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #6c63ff;
+            background: #fff;
+            box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.12);
+        }
+
+    .field-label {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .btn-submit {
+        background: #6c63ff;
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 12px 14px;
+        width: 100%;
+        font-weight: 800;
+        margin-top: 12px;
+        transition: 0.2s ease;
+    }
+
+        .btn-submit:hover {
+            background: #5a52e8;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+    .btn-email {
+        background: #198754;
+    }
+
+        .btn-email:hover {
+            background: #157347;
+        }
+
+    .validation-summary-errors ul {
+        padding-right: 18px;
+        margin-bottom: 0;
+    }
+
+    /* =========================================================
+           ✅ کلاس‌های اختصاصی پرداخت زرین پال (اگر کلاس‌های خودت فرق دارد بفرست)
+           ========================================================= */
+    /* .btn-zarinpal {
+        background: #ff9800 !important;
+    }
+
+        .btn-zarinpal:hover {
+            background: #fb8c00 !important;
+        }
+
+    .payment-hint {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-top: 6px;
+        text-align: center;
+    } */
+</style>
+
+<div class="page-wrapper">
+    <div class="auth-card">
+        <div class="auth-title">ورود به حساب کاربری</div>
+        <div class="auth-subtitle">با موبایل یا ایمیل وارد شوید</div>
+
+        @* پیام‌ها *@
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger p-2 small mt-2 text-center">@ViewBag.Error</div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success p-2 small mt-2 text-center">@TempData["Success"]</div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-warning p-2 small mt-2">
+                @Html.ValidationSummary(excludePropertyErrors: true)
+            </div>
+        }
+
+        @* یک توکن مشترک برای کل صفحه (AJAX) *@
+        <form id="antiForgeryForm" style="display:none;">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <ul class="nav nav-tabs" id="loginTab" role="tablist">
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link active w-100" id="mobile-tab"
+                        data-bs-toggle="tab" data-bs-target="#mobile-pane"
+                        type="button" role="tab" aria-controls="mobile-pane" aria-selected="true">
+                    ورود با موبایل
+                </button>
+            </li>
+
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link w-100" id="email-tab"
+                        data-bs-toggle="tab" data-bs-target="#email-pane"
+                        type="button" role="tab" aria-controls="email-pane" aria-selected="false">
+                    ورود با ایمیل
+                </button>
+            </li>
+
+            @* <!-- ✅ اضافه شد: تب پرداخت (فقط اینجا باید باشد) -->
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link w-100" id="payment-tab"
+                        data-bs-toggle="tab" data-bs-target="#payment-pane"
+                        type="button" role="tab" aria-controls="payment-pane" aria-selected="false">
+                    پرداخت زرین‌پال
+                </button>
+            </li> *@
+        </ul>
+
+        <div class="tab-content">
+
+            <!-- ورود با موبایل -->
+            <div class="tab-pane fade show active" id="mobile-pane" role="tabpanel" aria-labelledby="mobile-tab">
+                <form id="mobileForm" autocomplete="off">
+                    <div class="mb-3">
+                        <div class="field-label">شماره موبایل</div>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="09123456789" inputmode="numeric" />
+                    </div>
+
+                    <!-- این بخش زیر را اضافه کنید (قبلاً نبود) -->
+                    <div id="mobileOtpSection" style="display:none;" class="mb-3">
+                        <div class="field-label">کد تایید پیامکی</div>
+                        <input type="text" id="mobileOtpCode" class="form-control" placeholder="کد ۵ رقمی" />
+
+                        <button type="button" class="btn-submit btn-email" id="btnVerifyMobileOtp" style="margin-top:10px;">
+                            ورود به سیستم
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="mobileSubmit">
+                        دریافت کد تایید
+                    </button>
+
+                    <div id="mobileMsg" class="mt-2 small text-center" style="display:none;"></div>
+                </form>
+            </div>
+
+            <!-- ورود با ایمیل -->
+            <div class="tab-pane fade" id="email-pane" role="tabpanel" aria-labelledby="email-tab">
+
+                <div class="mt-3">
+                    <div class="mb-3">
+                        <div class="field-label">ایمیل</div>
+                        <input type="email" id="emailInput" class="form-control" placeholder="example@mail.com" />
+                    </div>
+
+                    <div id="emailOtpSection" style="display:none;" class="mb-3">
+                        <div class="field-label">کد تایید</div>
+                        <input type="text" id="emailOtpCode" class="form-control" placeholder="کد ۵ رقمی" />
+                    </div>
+
+                    <div id="emailOtpError" class="text-danger mt-2" style="display:none;"></div>
+
+                    <button type="button" id="btnSendEmailOtp" class="btn-submit">
+                        دریافت کد
+                    </button>
+
+                    <button type="button" class="btn-submit btn-email" id="btnVerifyEmailOtp" style="display:none;">
+                        ورود به سیستم
+                    </button>
+                </div>
+
+            </div>
+
+            @* <!-- ✅ اضافه شد: Payment Pane (هم‌سطح بقیه، داخل tab-content) -->
+            <div class="tab-pane fade" id="payment-pane" role="tabpanel" aria-labelledby="payment-tab">
+                <div class="mt-3">
+                    <div class="mb-3">
+                        <div class="field-label">مبلغ (تومان)</div>
+                        <input type="number" id="paymentAmount" class="form-control" placeholder="مثال: 50000" min="1000" />
+                        <div class="payment-hint">حداقل مبلغ: ۱۰۰۰ تومان</div>
+                    </div>
+
+                    <div id="paymentError" class="text-danger mt-2 mb-2" style="display:none;"></div>
+
+                    <button type="button" id="btnPayZarinpal" class="btn-submit btn-zarinpal">
+                        اتصال به درگاه پرداخت
+                    </button>
+                </div>
+            </div> *@
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ---------- Helpers ----------
+            function getAntiForgeryToken() {
+                return document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')?.value
+                    || document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    || '';
+            }
+
+            function normalizeOtpResult(result) {
+                // پشتیبانی از هر دو حالت camelCase و PascalCase
+                const isSuccess = result?.isSuccess ?? result?.IsSuccess ?? result?.success ?? result?.Success ?? false;
+                const message = result?.message ?? result?.Message ?? '';
+                const redirectUrl = result?.redirectUrl ?? result?.RedirectUrl ?? '';
+                return { isSuccess: !!isSuccess, message, redirectUrl, raw: result };
+            }
+
+            async function postRequest(url, data) {
+                const token = getAntiForgeryToken();
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'RequestVerificationToken': token
+                    },
+                    body: new URLSearchParams(data)
+                });
+
+                // سعی می‌کنیم بسته به content-type، JSON یا Text بخوانیم
+                const contentType = response.headers.get('content-type') || '';
+                const payload = contentType.includes('application/json')
+                    ? await response.json()
+                    : await response.text();
+
+                if (!response.ok) {
+                    // اگر سرور متن/HTML برگشت داد، همان را نمایش بده
+                    if (typeof payload === 'string') throw new Error(payload || ('HTTP ' + response.status));
+                    // اگر JSON بود
+                    const n = normalizeOtpResult(payload);
+                    throw new Error(n.message || ('HTTP ' + response.status));
+                }
+
+                return payload;
+            }
+
+            // ---------- Mobile ----------
+            const mobileForm = document.getElementById('mobileForm');
+            const mobileSubmit = document.getElementById('mobileSubmit');
+            const mobileMsg = document.getElementById('mobileMsg');
+
+            const mobileOtpSection = document.getElementById('mobileOtpSection');
+            const mobileOtpCode = document.getElementById('mobileOtpCode');
+            const btnVerifyMobileOtp = document.getElementById('btnVerifyMobileOtp');
+
+            function showMobileMsg(text, ok) {
+                if (!mobileMsg) return;
+                mobileMsg.textContent = text;
+                mobileMsg.className = ok
+                    ? 'mt-2 small text-center text-success'
+                    : 'mt-2 small text-center text-danger';
+                mobileMsg.style.display = 'block';
+            }
+
+            mobileForm?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (mobileMsg) mobileMsg.style.display = 'none';
+
+                const phoneInput = mobileForm.querySelector('input[name="PhoneNumber"]');
+                const phoneNumber = (phoneInput?.value || '').trim();
+
+                if (!phoneNumber) {
+                    showMobileMsg('لطفاً شماره موبایل را وارد کنید.', false);
+                    return;
+                }
+
+                mobileSubmit.disabled = true;
+                mobileSubmit.innerText = 'در حال ارسال...';
+
+                try {
+
+                    const sendResRaw = await postRequest('/Auth/SendSmsOtp', { phoneNumber });
+                    const sendRes = normalizeOtpResult(sendResRaw);
+
+                    console.log('SendSmsOtp response:', sendRes.raw);
+
+                    if (sendRes.isSuccess) {
+
+                        showMobileMsg(sendRes.message || 'کد تایید ارسال شد.', true);
+
+                        // نمایش بخش وارد کردن کد
+                        if (mobileOtpSection) mobileOtpSection.style.display = 'block';
+                        if (mobileSubmit) mobileSubmit.style.display = 'none';
+                    } else {
+                        showMobileMsg(sendRes.message || 'خطا در ارسال کد', false);
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    showMobileMsg(err.message || 'خطای ارتباط با سرور', false);
+                } finally {
+                    mobileSubmit.disabled = false;
+                    mobileSubmit.innerText = 'دریافت کد تایید';
+                }
+            });
+
+            // -------- Verify SMS OTP --------
+            btnVerifyMobileOtp?.addEventListener('click', async () => {
+
+                const phoneInput = mobileForm.querySelector('input[name="PhoneNumber"]');
+                const phoneNumber = (phoneInput?.value || '').trim();
+                const code = (mobileOtpCode?.value || '').trim();
+
+                if (!code) {
+                    showMobileMsg('لطفاً کد تایید را وارد کنید.', false);
+                    return;
+                }
+
+                btnVerifyMobileOtp.disabled = true;
+                btnVerifyMobileOtp.innerText = 'در حال ورود...';
+
+                try {
+
+                    const verifyResRaw = await postRequest('/Auth/VerifySmsOtp', { phoneNumber, code });
+                    const verifyRes = normalizeOtpResult(verifyResRaw);
+
+                    console.log('VerifySmsOtp response:', verifyRes.raw);
+
+                    if (verifyRes.isSuccess) {
+
+                        // ورود موفق → رفتن به مدیریت
+                        window.location.href = verifyRes.redirectUrl || '/Auth/Account';
+
+                    } else {
+
+                        showMobileMsg(verifyRes.message || 'کد اشتباه است', false);
+                        btnVerifyMobileOtp.disabled = false;
+                        btnVerifyMobileOtp.innerText = 'ورود به سیستم';
+
+                    }
+
+                } catch (err) {
+
+                    console.error(err);
+                    showMobileMsg(err.message || 'خطا در تایید کد', false);
+                    btnVerifyMobileOtp.disabled = false;
+                    btnVerifyMobileOtp.innerText = 'ورود به سیستم';
+
+                }
+            });
+
+            // ---------- Email ----------
+            const btnSendEmailOtp = document.getElementById('btnSendEmailOtp');
+            const btnVerifyEmailOtp = document.getElementById('btnVerifyEmailOtp');
+            const emailInput = document.getElementById('emailInput');
+            const emailOtpCode = document.getElementById('emailOtpCode');
+            const emailOtpSection = document.getElementById('emailOtpSection');
+            const emailOtpError = document.getElementById('emailOtpError');
+
+            function showEmailError(msg) {
+                if (!emailOtpError) return;
+                emailOtpError.textContent = msg || 'خطایی رخ داد';
+                emailOtpError.style.display = 'block';
+            }
+
+            function clearEmailError() {
+                if (!emailOtpError) return;
+                emailOtpError.textContent = '';
+                emailOtpError.style.display = 'none';
+            }
+
+            btnSendEmailOtp?.addEventListener('click', async () => {
+                clearEmailError();
+
+                const email = (emailInput?.value || '').trim();
+                if (!email) { showEmailError('لطفاً ایمیل را وارد کنید'); return; }
+
+                btnSendEmailOtp.disabled = true;
+                btnSendEmailOtp.innerText = 'در حال ارسال...';
+
+                try {
+                    const sendResRaw = await postRequest('/Auth/SendEmailOtp', { email });
+                    const sendRes = normalizeOtpResult(sendResRaw);
+
+                    console.log('SendEmailOtp response:', sendRes.raw);
+
+                    if (sendRes.isSuccess) {
+                        emailOtpSection.style.display = 'block';
+                        btnVerifyEmailOtp.style.display = 'block';
+                        btnSendEmailOtp.style.display = 'none';
+                    } else {
+                        showEmailError(sendRes.message || 'ارسال کد ناموفق بود');
+                        btnSendEmailOtp.disabled = false;
+                        btnSendEmailOtp.innerText = 'دریافت کد';
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showEmailError(e.message || 'خطا در ارسال کد');
+                    btnSendEmailOtp.disabled = false;
+                    btnSendEmailOtp.innerText = 'دریافت کد';
+                }
+            });
+
+            btnVerifyEmailOtp?.addEventListener('click', async () => {
+                clearEmailError();
+
+                const email = (emailInput?.value || '').trim();
+                const code = (emailOtpCode?.value || '').trim();
+
+                if (!code) { showEmailError('لطفاً کد تایید را وارد کنید'); return; }
+
+                btnVerifyEmailOtp.disabled = true;
+                btnVerifyEmailOtp.innerText = 'در حال ورود...';
+
+                try {
+                    const verifyResRaw = await postRequest('/Auth/VerifyEmailOtp', { email, code });
+                    const verifyRes = normalizeOtpResult(verifyResRaw);
+
+                    console.log('VerifyEmailOtp response:', verifyRes.raw);
+
+                    if (verifyRes.isSuccess) {
+                        window.location.href = verifyRes.redirectUrl || '/Auth/Account';
+                    } else {
+                        showEmailError(verifyRes.message || 'کد اشتباه است');
+                        btnVerifyEmailOtp.disabled = false;
+                        btnVerifyEmailOtp.innerText = 'ورود به سیستم';
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showEmailError(e.message || 'خطا در تایید کد');
+                    btnVerifyEmailOtp.disabled = false;
+                    btnVerifyEmailOtp.innerText = 'ورود به سیستم';
+                }
+            });
+
+            // =========================================================
+            // ✅ اضافه شد: ZarinPal Payment (در جای درست، خارج از بقیه handler ها)
+            // =========================================================
+            // const btnPayZarinpal = document.getElementById('btnPayZarinpal');
+            // const paymentAmount = document.getElementById('paymentAmount');
+            // const paymentError = document.getElementById('paymentError');
+
+            // function showPaymentError(msg) {
+            //     if (!paymentError) return;
+            //     paymentError.textContent = msg || 'خطایی رخ داد';
+            //     paymentError.style.display = 'block';
+            // }
+
+            // function clearPaymentError() {
+            //     if (!paymentError) return;
+            //     paymentError.textContent = '';
+            //     paymentError.style.display = 'none';
+            // }
+
+            // btnPayZarinpal?.addEventListener('click', async () => {
+            //     clearPaymentError();
+
+            //     const amount = Number((paymentAmount?.value || '').trim());
+
+            //     if (!amount || amount < 1000) {
+            //         showPaymentError('لطفاً مبلغ معتبری وارد کنید (حداقل ۱۰۰۰ تومان)');
+            //         return;
+            //     }
+
+            //     btnPayZarinpal.disabled = true;
+            //     btnPayZarinpal.innerText = 'در حال انتقال...';
+
+            //     try {
+            //         // پرداخت باید به PaymentController برود، نه AuthController
+            //         const resRaw = await postRequest('/Payment/RequestPayment', { amount });
+            //         console.log('Payment response:', resRaw);
+
+            //         if (typeof resRaw === 'object') {
+            //             const result = normalizeOtpResult(resRaw);
+
+            //             if (result.redirectUrl) {
+            //                 window.location.href = result.redirectUrl;
+            //                 return;
+            //             }
+
+            //             // اگر ساختار زرین‌پال خام برگشت
+            //             const authority = resRaw?.data?.authority;
+            //             if (authority) {
+            //                 window.location.href = `https://www.zarinpal.com/pg/StartPay/${authority}`;
+            //                 return;
+            //             }
+
+            //             showPaymentError(result.message || resRaw?.errors?.message || 'خطا در ایجاد درگاه پرداخت');
+            //         } else {
+            //             showPaymentError('پاسخ سرور معتبر نیست. اکشن پرداخت باید JSON برگرداند.');
+            //         }
+
+            //     } catch (e) {
+            //         console.error(e);
+            //         showPaymentError(e.message || 'خطای ارتباط با سرور');
+            //     } finally {
+            //         btnPayZarinpal.disabled = false;
+            //         btnPayZarinpal.innerText = 'اتصال به درگاه پرداخت';
+            //     }
+            // });
+
+
+        });
+    </script>
+}

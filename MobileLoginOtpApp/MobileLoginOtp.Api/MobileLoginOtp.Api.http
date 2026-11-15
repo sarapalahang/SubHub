@@ -1,0 +1,6 @@
+@MobileLoginOtp.Api_HostAddress = http://localhost:5244
+
+GET {{MobileLoginOtp.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,139 @@
+﻿@model MobileLoginOtp.Application.Dtos.ViewModels.UserRoleViewModel
+
+
+<div class="user-card">
+
+    <!-- تصویر کاربر -->
+    <div class="user-image">
+
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            var imageSrc = Model.ImagePath.StartsWith("/") || Model.ImagePath.StartsWith("~")
+                ? Url.Content(Model.ImagePath)
+                : Url.Content("~/uploads/profiles/" + Model.ImagePath);
+
+            <img src="@imageSrc" alt="user">
+        }
+        else
+        {
+            <img src="@Url.Content("~/uploads/profiles/default-user.png")" alt="user">
+        }
+
+    </div>
+
+    <!-- نام -->
+    <div class="user-info">
+        <strong>نام کاربر:</strong>
+        @(string.IsNullOrEmpty(Model.FullName) ? "نامشخص" : Model.FullName)
+    </div>
+
+    <!-- شماره -->
+    <div class="user-info">
+        <strong>شماره تماس:</strong>
+        <span dir="ltr">@Model.PhoneNumber</span>
+    </div>
+
+    <!-- نقش -->
+    <div class="user-info">
+        <strong>نقش فعلی:</strong>
+
+        <span class="badge @(Model.CurrentRole == "Admin" ? "bg-danger" : "bg-info text-dark")">
+            @Model.CurrentRole
+        </span>
+    </div>
+
+    <!-- تغییر نقش -->
+    <div class="user-actions">
+
+        <form asp-action="ChangeRole" asp-controller="Role" method="post">
+
+            <input type="hidden" name="userId" value="@Model.UserId" />
+
+            <div class="input-group">
+
+                <select name="roleName" class="form-select form-select-sm">
+
+                    @foreach (var role in Model.AllRoles)
+                    {
+                        <option value="@role.Name" selected="@(Model.CurrentRole == role.Name)">
+                            @role.Name
+                        </option>
+                    }
+
+                </select>
+
+                @* <button type="submit" class="btn btn-success btn-sm">
+                    ذخیره
+                </button> *@
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@* @model MobileLoginOtp.Models.ViewModels.UserRoleViewModel
+
+<div class="user-card">
+
+    <div class="user-image text-center mb-3">
+
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <img src="@Model.ImagePath"
+                 class="rounded-circle img-thumbnail"
+                 style="width:90px;height:90px;object-fit:cover;"
+                 alt="تصویر کاربر" />
+        }
+        else
+        {
+            <i class="bi bi-person-circle text-secondary" style="font-size:70px;"></i>
+        }
+
+    </div>
+
+    <div class="user-info mb-1">
+        <strong>نام کاربر:</strong>
+        @(string.IsNullOrEmpty(Model.FullName) ? "نامشخص" : Model.FullName)
+    </div>
+
+    <div class="user-info mb-1">
+        <strong>شماره تماس:</strong>
+        <span dir="ltr">@Model.PhoneNumber</span>
+    </div>
+
+    <div class="user-info mb-2">
+        <strong>نقش فعلی:</strong>
+        <span class="badge @(Model.CurrentRole == "Admin" ? "bg-danger" : "bg-info text-dark")">
+            @Model.CurrentRole
+        </span>
+    </div>
+
+    <form asp-action="ChangeRole" asp-controller="Role" method="post">
+
+        <input type="hidden" name="userId" value="@Model.UserId" />
+
+        <div class="input-group">
+
+            <select name="roleName" class="form-select form-select-sm">
+
+                @foreach (var role in Model.AllRoles)
+                {
+                    <option value="@role.Name" selected="@(Model.CurrentRole == role.Name)">
+                        @role.Name
+                    </option>
+                }
+
+            </select>
+
+            <button type="submit" class="btn btn-success btn-sm">
+                ذخیره
+            </button>
+
+        </div>
+
+    </form>
+
+</div> *@

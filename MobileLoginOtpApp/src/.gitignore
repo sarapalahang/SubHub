@@ -1,0 +1,19 @@
+# Build output and IDE state
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/*.suo
+**/*.slnLaunch.user
+
+# Local credentials and development settings
+/MobileLoginOtp/appsettings.json
+/MobileLoginOtp/appsettings.Development.json
+**/.env
+**/.env.*
+**/secrets.json
+
+# Uploaded user data; keep the default placeholder image
+**/wwwroot/uploads/**
+!**/wwwroot/uploads/profiles/
+!**/wwwroot/uploads/profiles/default-user.png

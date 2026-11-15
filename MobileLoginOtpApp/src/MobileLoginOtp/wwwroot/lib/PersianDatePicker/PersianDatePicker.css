@@ -1,0 +1,114 @@
+﻿.datePicker {
+    border: 1px solid #C6BFD7;
+    width: 280px;
+    direction: rtl;
+    font-family: 'B Nazanin', sans-serif;
+    font-size: 16px;
+    background-color: #f9fbfd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 10px;
+    color: #37474F;
+    transition: all 0.3s ease;
+}
+
+.datePickerHeader {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+    .datePickerHeader button {
+        border-radius: 4px;
+        padding: 4px 5px;
+        height: 28px;
+        border: 1px solid #c2cedc;
+        font-family:  sans-serif;
+        font-size: 15px;
+        background: White;
+        cursor: pointer;
+        margin: 0 2px;
+    }
+
+        .datePickerHeader button:hover {
+            border: 1px solid #FFCC66;
+            background: linear-gradient(#ffeb80, #efdb70);
+        }
+
+.datePickerMonth, .datePickerYear {
+    background-color: White;
+    text-align: center;
+    display: inline-block;
+    color: #116f1c;
+    height: 24px;
+    line-height: 24px;
+   /* border: 1px solid #c2cedc;
+    border-radius: 4px;*/
+    margin: 0 2px;
+    font-size: 16px;
+}
+
+.datePickerMonth {
+    width: 70px;
+}
+
+.datePickerYear {
+    width: 60px;
+}
+
+.datePickerContent {
+    display: flex;
+}
+
+.datePickerWeekdays {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-left: 6px;
+}
+
+    .datePickerWeekdays div {
+        width: 32px;
+        height: 30px;
+        text-align: center;
+        line-height: 30px;
+        font-weight: bold;
+        color: #455A64;
+    }
+
+.datePickerDays {
+    display: flex;
+    flex-wrap: wrap;
+    width: 210px;
+}
+
+.datePickerDay {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+    .datePickerDay:hover {
+        background-color: #ffd666;
+        color: #333;
+    }
+
+.datePickerDaySelect {
+    background-color: #3f51b5;
+    color: #fff;
+    font-weight: bold;
+}
+
+.datePickerToday {
+    background-color: #66bb6a;
+    color: #fff;
+    font-weight: bold;
+}
+
+.datePickerFriDay {
+    background-color: #ffe0cc;
+}

@@ -79,3 +79,9 @@ Set production secrets through the hosting provider's secret store or environmen
 - The expiry-notification report records attempts from the time notification logging is enabled.
 - OTP challenges are kept in process memory. Use a shared distributed cache when running multiple web instances.
 - Chart.js is loaded from a CDN, so report charts require network access unless the library is hosted locally.
+
+
+## Additional project
+
+This repository also includes a separate OTP-based ASP.NET Core solution in [MobileLoginOtpApp](MobileLoginOtpApp/). See its [README](MobileLoginOtpApp/README.md).
+
